@@ -24,8 +24,7 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Important: All buffer sizes are expected to be less than 256! (fit in 8
-// bits), and must be powers of 2.
+// Basic ringbuffer template
 
 #ifndef STMLIB_UTILS_RING_BUFFER_H_
 #define STMLIB_UTILS_RING_BUFFER_H_
@@ -68,7 +67,7 @@ class RingBuffer {
   inline T ImmediateRead() {
     size_t r = read_ptr_;
     T result = buffer_[r];
-    read_ptr_ = (r + 1) & (size - 1);
+    read_ptr_ = (r + 1) % size;
     return result;
   }
   

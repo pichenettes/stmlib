@@ -73,6 +73,12 @@ inline int16_t Interpolate(const int16_t* table, uint32_t phase) {
       table[(phase >> 24) + 1] * crossfade) >> 16;
 }
 
+inline int16_t Interpolate1024(const int16_t* table, uint32_t phase) {
+  uint16_t crossfade = phase >> 6;
+  return (table[(phase >> 22)] * (65535 - crossfade) + \
+      table[(phase >> 22) + 1] * crossfade) >> 16;
+}
+
 inline uint16_t Interpolate(const uint16_t* table, uint32_t phase) {
   uint16_t crossfade = phase >> 8;
   return (table[(phase >> 24)] * (65535 - crossfade) + \

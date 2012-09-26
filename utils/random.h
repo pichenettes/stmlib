@@ -47,7 +47,7 @@ class Random {
   }
   
   static inline int16_t GetSample() {
-    return static_cast<int16_t>(GetWord());
+    return static_cast<int16_t>(GetWord() >> 16);
   }
 
  private:

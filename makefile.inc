@@ -30,7 +30,7 @@ TOOLCHAIN_PATH = /usr/local/arm/
 TOOLCHAIN_BIN  = $(TOOLCHAIN_PATH)bin/
 STM32_PATH     = stmlib/third_party/STM
 
-PGM_SERIAL_PORT = /dev/ttyUSB0
+PGM_SERIAL_PORT = /dev/tty.usbserial-A100S09O
 PGM_SERIAL_BAUD_RATE = 115200
 PGM_SERIAL_VERIFY = -v
 
@@ -290,5 +290,8 @@ upload_jtag: $(TARGET_BIN)
 # Phony target for killing the system FTDI driver on OS X.
 kill_ftdi:
 	sudo kextunload -b com.FTDI.driver.FTDIUSBSerialDriver
+
+reload_ftdi:
+	sudo kextload -b com.FTDI.driver.FTDIUSBSerialDriver
 
 .PHONY: upload upload_serial upload_jtag kill_ftdi

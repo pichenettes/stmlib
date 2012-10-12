@@ -2,28 +2,37 @@
 //
 // Author: Olivier Gillet (ol.gillet@gmail.com)
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// 
+// See http://creativecommons.org/licenses/MIT/ for more information.
+//
+// -----------------------------------------------------------------------------
+//
+// Helper functions for using the last page of flash for non-volatile storage.
 
 #ifndef STMLIB_SYSTEM_STORAGE_H_
 #define STMLIB_SYSTEM_STORAGE_H_
 
 #include <stm32f10x_conf.h>
-#include "stmlib/stmlib.h"
 
-#if defined (STM32F10X_LD) || defined (STM32F10X_MD)
-  #define PAGE_SIZE  (uint16_t)0x400  /* Page size = 1KByte */
-#elif defined (STM32F10X_HD) || defined (STM32F10X_CL)
-  #define PAGE_SIZE  (uint16_t)0x800  /* Page size = 2KByte */
-#endif
+#include "stmlib/stmlib.h"
+#include "stmlib/system/flash_programming.h"
 
 namespace stmlib {
 
@@ -76,6 +85,6 @@ class Storage {
   }
 };
 
-};  // namespace edges
+};  // namespace stmlib
 
 #endif  // STMLIB_SYSTEM_STORAGE_H_

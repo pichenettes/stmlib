@@ -69,6 +69,8 @@ AS_FILES       = $(notdir $(wildcard $(patsubst %,%/*.as,$(PACKAGES))))
 TARGET_BIN     = $(BUILD_DIR)$(TARGET).bin
 TARGET_ELF     = $(BUILD_DIR)$(TARGET).elf
 TARGET_HEX     = $(BUILD_DIR)$(TARGET).hex
+BUNDLE_HEX     = $(BUILD_DIR)$(TARGET)_bootloader.hex
+BUNDLE_BIN     = $(BUILD_DIR)$(TARGET)_bootloader.bin
 TARGET_SIZE    = $(BUILD_DIR)$(TARGET).size
 TARGETS        = $(BUILD_DIR)$(TARGET).*
 DEP_FILE       = $(BUILD_DIR)depends.mk
@@ -87,12 +89,6 @@ INCFLAGS       = \
 			-DUSE_STDPERIPH_DRIVER \
 			-D$(SYSCLOCK)=$(F_CPU)
 
-ifeq ($(MEMORY_MODE),flash)
-INCFLAGS += -DMEMORY_MODE_FLASH
-else
-INCFLAGS += -DMEMORY_MODE_RAM
-endif
-
 ifeq ($(DENSITY),hd)
 INCFLAGS += -DSTM32F10X_HD
 else ifeq ($(DENSITY),md)
@@ -101,8 +97,17 @@ else
 INCFLAGS += -DSTM32F10X_CL
 endif
 
+ifeq ($(APPLICATION),TRUE)
+INCFLAGS += -DAPPLICATION
+LD_SUFFIX = _application
+BASE_ADDRESS = 0x08004000
+else
+BASE_ADDRESS = 0x08000000
+LD_SUFFIX =
+endif
+
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f10x_$(DENSITY).o
-LINKER_SCRIPT = stmlib/linker_scripts/stm32f10x_$(MEMORY_MODE)_$(DENSITY).ld
+LINKER_SCRIPT = stmlib/linker_scripts/stm32f10x_flash_$(DENSITY)$(LD_SUFFIX).ld
 
 CCFLAGS         = \
 			-g -O2 -Wall -Werror \
@@ -241,6 +246,8 @@ $(DEP_FILE):  $(BUILD_DIR) $(DEPS)
 
 bin:	$(TARGET_BIN)
 
+hex:	$(TARGET_HEX)
+
 clean:
 	$(REMOVE) $(OBJS) $(TARGETS) $(DEP_FILE) $(DEPS)
 
@@ -277,7 +284,32 @@ upload_serial: $(TARGET_BIN)
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-e \
-		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY) 
+		-a $(BASE_ADDRESS) \
+		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
+
+image_serial:
+	@python $(STM32LOADER_PATH)stm32loader.py \
+		-p $(PGM_SERIAL_PORT) \
+		-b $(PGM_SERIAL_BAUD_RATE) \
+		-r -l 18000 image.bin
+
+upload_serial_no_erase: $(TARGET_BIN)
+	@python $(STM32LOADER_PATH)stm32loader.py \
+		-p $(PGM_SERIAL_PORT) \
+		-b $(PGM_SERIAL_BAUD_RATE) \
+		-a $(BASE_ADDRESS) \
+		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
+
+upload_bundle_serial: $(TARGET_HEX)
+	make -f $(BOOTLOADER)/makefile hex
+	cat build/$(BOOTLOADER)/$(BOOTLOADER).hex $(TARGET_HEX) | \
+			awk -f stmlib/merge_hex.awk > $(BUNDLE_HEX)
+	$(OBJCOPY) -I ihex -O binary $(BUNDLE_HEX) $(BUNDLE_BIN)
+	@python $(STM32LOADER_PATH)stm32loader.py \
+		-p $(PGM_SERIAL_PORT) \
+		-b $(PGM_SERIAL_BAUD_RATE) \
+		-e \
+		-w $(BUNDLE_BIN) $(PGM_SERIAL_VERIFY)
 
 upload_jtag: $(TARGET_BIN)
 	openocd \
@@ -294,4 +326,6 @@ kill_ftdi:
 reload_ftdi:
 	sudo kextload -b com.FTDI.driver.FTDIUSBSerialDriver
 
-.PHONY: upload upload_serial upload_jtag kill_ftdi
+.PHONY: upload upload_serial upload_serial_no_erase upload_jtag
+.PHONY: upload_bundle_serial upload_jtag
+.PHONY: kill_ftdi reload_ftdi

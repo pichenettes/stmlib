@@ -36,13 +36,22 @@
 
 namespace stmlib {
 
-inline int16_t Interpolate(const int16_t* table, uint32_t phase)
+inline int16_t Interpolate824(const int16_t* table, uint32_t phase)
   __attribute__((always_inline));
 
-inline uint16_t Interpolate(const uint16_t* table, uint32_t phase)
+inline uint16_t Interpolate824(const uint16_t* table, uint32_t phase)
   __attribute__((always_inline));
 
-inline int16_t Interpolate(const uint8_t* table, uint32_t phase)
+inline int16_t Interpolate824(const uint8_t* table, uint32_t phase)
+  __attribute__((always_inline));
+
+inline int16_t Interpolate1022(const uint8_t* table, uint32_t phase)
+  __attribute__((always_inline));
+
+inline uint16_t Interpolate88(const uint16_t* table, uint16_t index)
+  __attribute__((always_inline));
+
+inline int16_t Interpolate88(const int16_t* table, uint16_t index)
   __attribute__((always_inline));
 
 inline int16_t Crossfade(
@@ -67,34 +76,41 @@ inline uint16_t Mix(uint16_t a, uint16_t b, uint16_t balance) {
   return (a * (65535 - balance) + b * balance) >> 16;
 }
 
-inline int16_t Interpolate(const int16_t* table, uint32_t phase) {
-  uint16_t crossfade = phase >> 8;
-  return (table[(phase >> 24)] * (65535 - crossfade) + \
-      table[(phase >> 24) + 1] * crossfade) >> 16;
+inline int16_t Interpolate824(const int16_t* table, uint32_t phase) {
+  int32_t a = table[phase >> 24];
+  int32_t b = table[(phase >> 24) + 1];
+  return a + ((b - a) * static_cast<int32_t>((phase >> 9) & 0x7fff) >> 15);
 }
 
-inline int16_t Interpolate1024(const int16_t* table, uint32_t phase) {
-  uint16_t crossfade = phase >> 6;
-  return (table[(phase >> 22)] * (65535 - crossfade) + \
-      table[(phase >> 22) + 1] * crossfade) >> 16;
+inline uint16_t Interpolate824(const uint16_t* table, uint32_t phase) {
+  int32_t a = table[phase >> 24];
+  int32_t b = table[(phase >> 24) + 1];
+  return a + ((b - a) * static_cast<int32_t>((phase >> 9) & 0x7fff) >> 15);
 }
 
-inline uint16_t Interpolate(const uint16_t* table, uint32_t phase) {
-  uint16_t crossfade = phase >> 8;
-  return (table[(phase >> 24)] * (65535 - crossfade) + \
-      table[(phase >> 24) + 1] * crossfade) >> 16;
+inline int16_t Interpolate824(const uint8_t* table, uint32_t phase) {
+  int32_t a = table[phase >> 24];
+  int32_t b = table[(phase >> 24) + 1];
+  return (a << 8) + \
+      ((b - a) * static_cast<int32_t>((phase >> 1) & 0x7fffff) >> 15) - 32768;
 }
 
-inline uint16_t InterpolateIncreasing(const uint16_t* table, uint16_t index) {
-  uint16_t a = table[index >> 8];
-  uint16_t b = table[(index >> 8) + 1];
-  return a + (static_cast<uint32_t>((b - a) * (index & 0xff)) >> 8);
+inline uint16_t Interpolate88(const uint16_t* table, uint16_t index) {
+  int32_t a = table[index >> 8];
+  int32_t b = table[(index >> 8) + 1];
+  return a + ((b - a) * static_cast<int32_t>(index & 0xff) >> 8);
 }
 
-inline int16_t Interpolate(const uint8_t* table, uint32_t phase) {
-  uint16_t crossfade = phase >> 8;
-  return ((table[(phase >> 24)] * (65535 - crossfade) + \
-      table[(phase >> 24) + 1] * crossfade) >> 8) - 32768;
+inline int16_t Interpolate88(const int16_t* table, uint16_t index) {
+  int32_t a = table[index >> 8];
+  int32_t b = table[(index >> 8) + 1];
+  return a + ((b - a) * static_cast<int32_t>(index & 0xff) >> 8);
+}
+
+inline int16_t Interpolate1022(const int16_t* table, uint32_t phase) {
+  int32_t a = table[phase >> 22];
+  int32_t b = table[(phase >> 22) + 1];
+  return a + ((b - a) * static_cast<int32_t>((phase >> 7) & 0x7fff) >> 15);
 }
 
 inline int16_t Crossfade(
@@ -102,8 +118,8 @@ inline int16_t Crossfade(
     const int16_t* table_b,
     uint32_t phase,
     uint16_t balance) {
-  return (Interpolate(table_a, phase) * (65535 - balance) + \
-      Interpolate(table_b, phase) * balance) >> 16;
+  return (Interpolate824(table_a, phase) * (65535 - balance) + \
+      Interpolate824(table_b, phase) * balance) >> 16;
 }
 
 inline int16_t Crossfade(
@@ -111,8 +127,8 @@ inline int16_t Crossfade(
     const uint8_t* table_b,
     uint32_t phase,
     uint16_t balance) {
-  return (Interpolate(table_a, phase) * (65535 - balance) + \
-      Interpolate(table_b, phase) * balance) >> 16;
+  return (Interpolate824(table_a, phase) * (65535 - balance) + \
+      Interpolate824(table_b, phase) * balance) >> 16;
 }
 
 }  // namespace stmlib

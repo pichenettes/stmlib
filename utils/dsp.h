@@ -118,8 +118,9 @@ inline int16_t Crossfade(
     const int16_t* table_b,
     uint32_t phase,
     uint16_t balance) {
-  return (Interpolate824(table_a, phase) * (65535 - balance) + \
-      Interpolate824(table_b, phase) * balance) >> 16;
+  int32_t a = Interpolate824(table_a, phase);
+  int32_t b = Interpolate824(table_b, phase);
+  return a + ((b - a) * static_cast<int32_t>(balance >> 1) >> 15);
 }
 
 inline int16_t Crossfade(
@@ -127,8 +128,9 @@ inline int16_t Crossfade(
     const uint8_t* table_b,
     uint32_t phase,
     uint16_t balance) {
-  return (Interpolate824(table_a, phase) * (65535 - balance) + \
-      Interpolate824(table_b, phase) * balance) >> 16;
+  int32_t a = Interpolate824(table_a, phase);
+  int32_t b = Interpolate824(table_b, phase);
+  return a + ((b - a) * static_cast<int32_t>(balance >> 1) >> 15);
 }
 
 }  // namespace stmlib

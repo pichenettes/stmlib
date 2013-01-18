@@ -54,16 +54,6 @@ typedef union {
   uint8_t bytes[4];
 } LongWord;
 
-struct uint24_t {
-  uint16_t integral;
-  uint8_t fractional;
-};
-
-struct uint24c_t {
-  uint8_t carry;
-  uint16_t integral;
-  uint8_t fractional;
-};
 
 template<uint32_t a, uint32_t b, uint32_t c, uint32_t d>
 struct FourCC {

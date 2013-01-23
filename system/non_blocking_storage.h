@@ -26,45 +26,47 @@
 //
 // Helper functions for using the last page of flash for non-volatile storage.
 
-#ifndef STMLIB_SYSTEM_STORAGE_H_
-#define STMLIB_SYSTEM_STORAGE_H_
+#ifndef STMLIB_SYSTEM_NON_BLOCKING_STORAGE_H_
+#define STMLIB_SYSTEM_NON_BLOCKING_STORAGE_H_
 
 #include <stm32f10x_conf.h>
 
 #include "stmlib/stmlib.h"
 #include "stmlib/system/flash_programming.h"
+#include "stmlib/system/flash_writer.h"
 
 namespace stmlib {
 
 template<uint32_t last_address = 0x8020000>
-class Storage {
+class NonBlockingStorage {
  public:
   enum {
     FLASH_STORAGE_BASE = last_address - PAGE_SIZE
   };
   
+  static void Init() {
+    FLASH_Unlock();
+    flash_writer_.Init();
+  }
+
+  static void Process() {
+    flash_writer_.Process();
+  }
+  
+  static void Flush() {
+    flash_writer_.Flush();
+  }
+  
   template<typename T>
   static void Save(const T& data) {
-    FLASH_Unlock();
-    FLASH_ErasePage(FLASH_STORAGE_BASE);
+    flash_writer_.ErasePage(FLASH_STORAGE_BASE);
     
     // Write argument.
-    const uint32_t* words = (const uint32_t*)(&data);
-    size_t size = sizeof(T);
-    uint32_t address = FLASH_STORAGE_BASE;
-    while (size >= 4) {
-      FLASH_ProgramWord(address, *words++);
-      address += 4;
-      size -= 4;
-    }
-    // If the size is not a multiple of 4, write tail.
-    if (size) {
-      FLASH_ProgramWord(address, *(const uint16_t*)(words));
-    }
+    flash_writer_.Write(FLASH_STORAGE_BASE, (uint32_t)(&data), sizeof(T));
     
     // Write checksum.
     uint16_t checksum = Checksum((const void*)(&data), sizeof(T));
-    FLASH_ProgramHalfWord(FLASH_STORAGE_BASE + sizeof(T), checksum);
+    flash_writer_.WriteHalfWord(FLASH_STORAGE_BASE + sizeof(T), checksum);
   };
   
   template<typename T>
@@ -83,8 +85,15 @@ class Storage {
     }
     return s;
   }
+
+  static FlashWriter flash_writer_;
+  
+  DISALLOW_COPY_AND_ASSIGN(NonBlockingStorage);
 };
+
+template<uint32_t last_address>
+FlashWriter NonBlockingStorage<last_address>::flash_writer_;
 
 };  // namespace stmlib
 
-#endif  // STMLIB_SYSTEM_STORAGE_H_
+#endif  // STMLIB_SYSTEM_NON_BLOCKING_STORAGE_H_

@@ -40,10 +40,14 @@ class SystemClock {
   
   inline void Init() { count_ = 0; }
   inline void Tick() { ++count_; }
-  uint32_t milliseconds() const { return count_; }
+  inline volatile uint32_t milliseconds() const { return count_; }
+  inline void Delay(uint32_t ms) {
+    uint32_t target = milliseconds() + ms;
+    while (milliseconds() <= target);
+  }
 
  private:
-  uint32_t count_;
+  volatile uint32_t count_;
 
   DISALLOW_COPY_AND_ASSIGN(SystemClock);
 };

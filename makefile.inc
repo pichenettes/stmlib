@@ -69,8 +69,9 @@ AS_FILES       = $(notdir $(wildcard $(patsubst %,%/*.as,$(PACKAGES))))
 TARGET_BIN     = $(BUILD_DIR)$(TARGET).bin
 TARGET_ELF     = $(BUILD_DIR)$(TARGET).elf
 TARGET_HEX     = $(BUILD_DIR)$(TARGET).hex
-BUNDLE_HEX     = $(BUILD_DIR)$(TARGET)_bootloader.hex
-BUNDLE_BIN     = $(BUILD_DIR)$(TARGET)_bootloader.bin
+COMBO_HEX      = $(BUILD_DIR)$(TARGET)_bootloader_combo.hex
+COMBO_BIN      = $(BUILD_DIR)$(TARGET)_bootloader_combo.bin
+BOOTLOADER_HEX = $(BUILD_ROOT)$(BOOTLOADER)/$(BOOTLOADER).hex
 TARGET_SIZE    = $(BUILD_DIR)$(TARGET).size
 TARGETS        = $(BUILD_DIR)$(TARGET).*
 DEP_FILE       = $(BUILD_DIR)depends.mk
@@ -274,6 +275,16 @@ include $(DEP_FILE)
 
 
 # ------------------------------------------------------------------------------
+# Bootloader merging
+# ------------------------------------------------------------------------------
+
+$(COMBO_BIN):  $(TARGET_HEX)
+	cat  $(TARGET_HEX) $(BOOTLOADER_HEX) | \
+			awk -f stmlib/programming/merge_hex.awk > $(COMBO_HEX)
+	$(OBJCOPY) -I ihex -O binary $(COMBO_HEX) $(COMBO_BIN)
+
+
+# ------------------------------------------------------------------------------
 # Firmware flashing
 # ------------------------------------------------------------------------------
 
@@ -300,16 +311,12 @@ upload_serial_no_erase: $(TARGET_BIN)
 		-a $(BASE_ADDRESS) \
 		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
 
-upload_bundle_serial: $(TARGET_HEX)
-	make -f $(BOOTLOADER)/makefile hex
-	cat build/$(BOOTLOADER)/$(BOOTLOADER).hex $(TARGET_HEX) | \
-			awk -f stmlib/merge_hex.awk > $(BUNDLE_HEX)
-	$(OBJCOPY) -I ihex -O binary $(BUNDLE_HEX) $(BUNDLE_BIN)
+upload_combo_serial: $(TARGET_HEX)
 	@python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-e \
-		-w $(BUNDLE_BIN) $(PGM_SERIAL_VERIFY)
+		-w $(COMBO_BIN) $(PGM_SERIAL_VERIFY)
 
 upload_jtag: $(TARGET_BIN)
 	openocd \
@@ -317,6 +324,14 @@ upload_jtag: $(TARGET_BIN)
 		-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
 		-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
 		-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
+		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+upload_combo_jtag: $(COMBO_BIN)
+	openocd \
+		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
+		-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
 		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 # Phony target for killing the system FTDI driver on OS X.

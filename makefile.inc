@@ -278,7 +278,7 @@ include $(DEP_FILE)
 # Bootloader merging
 # ------------------------------------------------------------------------------
 
-$(COMBO_BIN):  $(TARGET_HEX)
+$(COMBO_BIN):  $(TARGET_HEX) $(BOOTLOADER_HEX)
 	cat  $(TARGET_HEX) $(BOOTLOADER_HEX) | \
 			awk -f stmlib/programming/merge_hex.awk > $(COMBO_HEX)
 	$(OBJCOPY) -I ihex -O binary $(COMBO_HEX) $(COMBO_BIN)

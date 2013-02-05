@@ -89,12 +89,27 @@ INCFLAGS       = \
 			-DUSE_STDPERIPH_DRIVER \
 			-D$(SYSCLOCK)=$(F_CPU)
 
+ifeq ($(FAMILY),f4xx)
+
+INCFLAGS += -DSTM32F4XX
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f4xx.o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32f4xx_flash$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F4xx_StdPeriph_Driver
+
+else
+
 ifeq ($(DENSITY),hd)
 INCFLAGS += -DSTM32F10X_HD
 else ifeq ($(DENSITY),md)
 INCFLAGS += -DSTM32F10X_MD
 else
 INCFLAGS += -DSTM32F10X_CL
+endif
+
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f10x_$(DENSITY).o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32f10x_flash_$(DENSITY)$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F10x_StdPeriph_Driver
+
 endif
 
 ifeq ($(APPLICATION),TRUE)
@@ -105,9 +120,6 @@ else
 BASE_ADDRESS = 0x08000000
 LD_SUFFIX =
 endif
-
-STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f10x_$(DENSITY).o
-LINKER_SCRIPT = stmlib/linker_scripts/stm32f10x_flash_$(DENSITY)$(LD_SUFFIX).ld
 
 CCFLAGS         = \
 			-g -O2 -Wall -Werror \
@@ -140,10 +152,9 @@ LDFLAGS       = \
 # ------------------------------------------------------------------------------
 
 FW_BUILD_DIR = $(BUILD_ROOT)stm_firmware/
-FW_CORE_DIR = $(STM32_PATH)/CMSIS/CM3
+FW_CORE_DIR = $(STM32_PATH)/CMSIS/CM3_$(FAMILY)
 FW_STARTUP_DIR = $(FW_CORE_DIR)/startup/gcc
 
-FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F10x_StdPeriph_Driver
 FW_STDDRIVER_SRCDIR = $(FW_STDDRIVER_DIR)/src
 FW_STDDRIVER_INCDIR = $(FW_STDDRIVER_DIR)/inc
 
@@ -280,25 +291,25 @@ include $(DEP_FILE)
 upload:	$(UPLOAD_COMMAND)
 
 upload_serial: $(TARGET_BIN)
-	@python $(STM32LOADER_PATH)stm32loader.py \
+	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-e \
 		-a $(BASE_ADDRESS) \
 		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
 
-image_serial:
-	@python $(STM32LOADER_PATH)stm32loader.py \
-		-p $(PGM_SERIAL_PORT) \
-		-b $(PGM_SERIAL_BAUD_RATE) \
-		-r -l 18000 image.bin
-
 upload_serial_no_erase: $(TARGET_BIN)
-	@python $(STM32LOADER_PATH)stm32loader.py \
+	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-a $(BASE_ADDRESS) \
 		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
+
+image_serial:
+	python $(STM32LOADER_PATH)stm32loader.py \
+		-p $(PGM_SERIAL_PORT) \
+		-b $(PGM_SERIAL_BAUD_RATE) \
+		-r -l 18000 image.bin
 
 upload_bundle_serial: $(TARGET_HEX)
 	make -f $(BOOTLOADER)/makefile hex
@@ -311,11 +322,21 @@ upload_bundle_serial: $(TARGET_HEX)
 		-e \
 		-w $(BUNDLE_BIN) $(PGM_SERIAL_VERIFY)
 
+upload_bundle_serial_no_erase: $(TARGET_HEX)
+	make -f $(BOOTLOADER)/makefile hex
+	cat build/$(BOOTLOADER)/$(BOOTLOADER).hex $(TARGET_HEX) | \
+			awk -f stmlib/merge_hex.awk > $(BUNDLE_HEX)
+	$(OBJCOPY) -I ihex -O binary $(BUNDLE_HEX) $(BUNDLE_BIN)
+	@python $(STM32LOADER_PATH)stm32loader.py \
+		-p $(PGM_SERIAL_PORT) \
+		-b $(PGM_SERIAL_BAUD_RATE) \
+		-w $(BUNDLE_BIN) $(PGM_SERIAL_VERIFY)
+
 upload_jtag: $(TARGET_BIN)
 	openocd \
 		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
 		-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
 		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 

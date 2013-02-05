@@ -399,9 +399,6 @@ if __name__ == "__main__":
         bootversion = cmd.cmdGet()
         mdebug(0, "Bootloader version %X" % bootversion)
         mdebug(0, "Chip id `%s'" % str(map(lambda c: hex(ord(c)), cmd.cmdGetID())))
-#    cmd.cmdGetVersion()
-#    cmd.cmdGetID()
-#    cmd.cmdReadoutUnprotect()
 #    cmd.cmdWriteUnprotect()
 #    cmd.cmdWriteProtect([0, 1])
 

@@ -291,7 +291,7 @@ $(COMBO_BIN):  $(TARGET_HEX) $(BOOTLOADER_HEX)
 upload:	$(UPLOAD_COMMAND)
 
 upload_serial: $(TARGET_BIN)
-	@python $(STM32LOADER_PATH)stm32loader.py \
+	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-e \
@@ -299,40 +299,50 @@ upload_serial: $(TARGET_BIN)
 		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
 
 image_serial:
-	@python $(STM32LOADER_PATH)stm32loader.py \
+	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-r -l 18000 image.bin
 
 upload_serial_no_erase: $(TARGET_BIN)
-	@python $(STM32LOADER_PATH)stm32loader.py \
+	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-a $(BASE_ADDRESS) \
 		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
 
-upload_combo_serial: $(TARGET_HEX)
-	@python $(STM32LOADER_PATH)stm32loader.py \
+upload_combo_serial: $(COMBO_BIN)
+	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-e \
 		-w $(COMBO_BIN) $(PGM_SERIAL_VERIFY)
 
+UPLOAD_JTAG_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
+			-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+UPLOAD_JTAG_COMBO_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
+			-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+
+# Because of a weird OpenOCD bug, this command sometimes fails with an
+# "Error: error executing stm32x flash write algorithm" error. Retrying
+# immediately always solves it.
+
 upload_jtag: $(TARGET_BIN)
-	openocd \
-		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
-		-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
-		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+	$(UPLOAD_JTAG_CMD) || $(UPLOAD_JTAG_CMD)
 
 upload_combo_jtag: $(COMBO_BIN)
-	openocd \
-		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)stm32.cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
-		-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
-		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+	$(UPLOAD_JTAG_COMBO_CMD) || $(UPLOAD_JTAG_COMBO_CMD)
+
 
 # Phony target for killing the system FTDI driver on OS X.
 kill_ftdi:

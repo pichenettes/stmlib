@@ -24,36 +24,22 @@
 //
 // -----------------------------------------------------------------------------
 //
-// System time.
+// Helper functions for using the last page of flash for non-volatile storage.
 
-#ifndef STMLIB_SYSTEM_SYSTEM_CLOCK_H_
-#define STMLIB_SYSTEM_SYSTEM_CLOCK_H_
+#ifndef STMLIB_SYSTEM_UID_H_
+#define STMLIB_SYSTEM_UID_H_
+
+#include <stm32f10x_conf.h>
 
 #include "stmlib/stmlib.h"
 
 namespace stmlib {
 
-class SystemClock {
- public:
-  SystemClock() { }
-  ~SystemClock() { }
-  
-  inline void Init() { count_ = 0; }
-  inline void Tick() { ++count_; }
-  inline volatile uint32_t milliseconds() const { return count_; }
-  inline void Delay(uint32_t ms) {
-    uint32_t target = milliseconds() + ms;
-    while (milliseconds() <= target);
-  }
+uint32_t GetUniqueId(uint8_t word) {
+  uint32_t* base_address = (uint32_t*)(0x1ffff7e8);
+  return base_address[word];
+}
 
- private:
-  volatile uint32_t count_;
+};  // namespace stmlib
 
-  DISALLOW_COPY_AND_ASSIGN(SystemClock);
-};
-
-extern SystemClock system_clock;
-
-}  // namespace stmlib
-
-#endif  // STMLIB_SYSTEM_SYSTEM_CLOCK_H_
+#endif  // STMLIB_SYSTEM_UID_H_

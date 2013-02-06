@@ -43,6 +43,7 @@ CC             = $(TOOLCHAIN_BIN)arm-none-eabi-gcc
 CXX            = $(TOOLCHAIN_BIN)arm-none-eabi-g++
 AS             = $(TOOLCHAIN_BIN)arm-none-eabi-as
 OBJCOPY        = $(TOOLCHAIN_BIN)arm-none-eabi-objcopy
+DB             = $(TOOLCHAIN_BIN)arm-none-eabi-gdb
 OBJDUMP        = $(TOOLCHAIN_BIN)arm-none-eabi-objdump
 AR             = $(TOOLCHAIN_BIN)arm-none-eabi-ar
 SIZE           = $(TOOLCHAIN_BIN)arm-none-eabi-size
@@ -81,7 +82,7 @@ INCFLAGS += -DSTM32F4XX
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f4xx.o
 LINKER_SCRIPT = stmlib/linker_scripts/stm32f4xx_flash$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F4xx_StdPeriph_Driver
-ARCH = cortex-m4
+ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork
 ARCH_DEFINE = GCC_ARMCM4
 
 else
@@ -97,7 +98,7 @@ endif
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f10x_$(DENSITY).o
 LINKER_SCRIPT = stmlib/linker_scripts/stm32f10x_flash_$(DENSITY)$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F10x_StdPeriph_Driver
-ARCH = cortex-m3
+ARCHFLAGS = -mcpu=cortex-m3 -mthumb
 ARCH_DEFINE = GCC_ARMCM3
 
 endif
@@ -115,7 +116,6 @@ endif
 # Flags for gcc/binutils
 # ------------------------------------------------------------------------------
 
-ARCHFLAGS      = -mcpu=$(ARCH) -mthumb
 INCFLAGS       = \
 			-I. \
 			-D$(ARCH_DEFINE) \
@@ -123,7 +123,6 @@ INCFLAGS       = \
 			-DF_CRYSTAL=$(F_CRYSTAL) \
 			-DUSE_STDPERIPH_DRIVER \
 			-D$(SYSCLOCK)=$(F_CPU)
-
 
 CCFLAGS         = \
 			-g -O2 -Wall -Werror \
@@ -145,7 +144,7 @@ ASFLAGS       = $(ARCHFLAGS)
 LDFLAGS       = \
 			-Wl,-Map=$(BUILD_DIR)$(TARGET).map \
 			-Wl,--gc-sections \
-			-T $(LINKER_SCRIPT) -g \
+			-T $(LINKER_SCRIPT) \
 			$(ARCHFLAGS) \
 			$(INCFLAGS) \
 			-L$(STM32_PATH)
@@ -352,6 +351,16 @@ UPLOAD_JTAG_COMBO_CMD = openocd \
 			-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
+debug_server: $(TARGET_BIN)
+	openocd \
+		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+		-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
+		-c "reset halt"
+
+debug_client:
+	$(DB) --eval-command="target remote localhost:3333" $(TARGET_ELF)
 
 # Because of a weird OpenOCD bug, this command sometimes fails with an
 # "Error: error executing stm32x flash write algorithm" error. Retrying
@@ -373,3 +382,4 @@ reload_ftdi:
 .PHONY: upload upload_serial upload_serial_no_erase upload_jtag
 .PHONY: upload_bundle_serial upload_jtag
 .PHONY: kill_ftdi reload_ftdi
+.PHONY: debug_client debug_server

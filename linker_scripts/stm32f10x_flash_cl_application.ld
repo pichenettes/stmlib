@@ -4,37 +4,39 @@
 
 MEMORY
 {
-	FLASH (rx)  : ORIGIN = 0x08004000, LENGTH = 240K
-	RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+  FLASH (rx)  : ORIGIN = 0x08004000, LENGTH = 240K
+  RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 SECTIONS
 {
-	.text :
-	{
-		_start = .;
-		KEEP(*(.isr_vector))
-		*(.text*)
-		*(.rodata*)
-		_etext = .;
-		_sidata = .;
-	} > FLASH
+  .text :
+  {
+    _start = .;
+    KEEP(*(.isr_vector))
+    *(.text*)
+    *(.rodata*)
+    _etext = .;
+    _sidata = .;
+  } > FLASH
 
-	.data : AT (ADDR(.text) + SIZEOF(.text))
-	{
-		_sdata = .;
-		*(.data*)
-		_edata = .;
-	} > RAM
+  .data : AT (ADDR(.text) + SIZEOF(.text))
+  {
+    _sdata = .;
+    *(.ramtext*)
+    . = ALIGN(4);
+    *(.data*)
+    _edata = .;
+  } > RAM
 
-	.bss :
-	{
-		_sstack = .;
-		. = . + 512;
-		_estack = .;
-		_sbss = .;
-		*(.bss*)
-		*(COMMON)
-		_ebss = .;
-	} > RAM
+  .bss :
+  {
+    _sstack = .;
+    . = . + 512;
+    _estack = .;
+    _sbss = .;
+    *(.bss*)
+    *(COMMON)
+    _ebss = .;
+  } > RAM
 }

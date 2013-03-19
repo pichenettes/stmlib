@@ -108,8 +108,9 @@ APPLICATION_DEFINE = -DAPPLICATION
 LD_SUFFIX = _application
 BASE_ADDRESS = 0x08004000
 else
-BASE_ADDRESS = 0x08000000
+APPLICATION_DEFINE = -DNO_APPLICATION
 LD_SUFFIX =
+BASE_ADDRESS = 0x08000000
 endif
 
 # ------------------------------------------------------------------------------

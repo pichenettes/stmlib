@@ -218,7 +218,7 @@ $(BUILD_DIR)%.bin: $(BUILD_DIR)%.elf
 	$(OBJCOPY) -O binary $< $@
 
 $(BUILD_DIR)%.lss: $(BUILD_DIR)%.elf
-	$(OBJDUMP) -h -S $< > $@
+	$(OBJDUMP) -d -h -S $< > $@
 
 $(BUILD_DIR)%.sym: $(BUILD_DIR)%.elf
 	$(NM) -n $< > $@
@@ -282,7 +282,7 @@ size: $(TARGET_SIZE)
 ramsize: $(TARGET_SIZE)
 	cat $(TARGET_SIZE) | awk '{ print $$2+$$3 }' | tail -n1 $(FORMAT_RAMSIZE)
 
-size_report:  build/$(TARGET)/$(TARGET).lss build/$(TARGET)/$(TARGET).top_symbols
+disassemble:  build/$(TARGET)/$(TARGET).lss build/$(TARGET)/$(TARGET).top_symbols
 
 .PHONY: all bin clean depends resources
 

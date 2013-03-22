@@ -33,7 +33,7 @@
 
 namespace stmlib {
 
-enum AllocatorFlags {
+enum VoiceAllocatorFlags {
   NOT_ALLOCATED = 0xff,
   ACTIVE_NOTE = 0x80
 };
@@ -50,7 +50,7 @@ class VoiceAllocator {
 
   uint8_t NoteOn(uint8_t note) {
     if (size_ == 0) {
-      return kNotAllocated;
+      return NOT_ALLOCATED;
     }
 
     // First, check if there is a voice currently playing this note. In this
@@ -60,7 +60,7 @@ class VoiceAllocator {
     uint8_t voice = Find(note);
 
     // Then, try to find the least recently touched, currently inactive voice.
-    if (voice == kNotAllocated) {
+    if (voice == NOT_ALLOCATED) {
       for (uint8_t i = 0; i < capacity; ++i) {
         if (lru_[i] < size_ && !(pool_[lru_[i]] & ACTIVE_NOTE)) {
           voice = lru_[i];
@@ -69,7 +69,7 @@ class VoiceAllocator {
     }
     // If all voices are active, use the least recently played note
     // (voice-stealing).
-    if (voice == kNotAllocated) {
+    if (voice == NOT_ALLOCATED) {
       for (uint8_t i = 0; i < capacity; ++i) {
         if (lru_[i] < size_) {
           voice = lru_[i];
@@ -83,7 +83,7 @@ class VoiceAllocator {
 
   uint8_t NoteOff(uint8_t note) {
     uint8_t voice = Find(note);
-    if (voice != kNotAllocated) {
+    if (voice != NOT_ALLOCATED) {
       pool_[voice] &= 0x7f;
       Touch(voice);
     }
@@ -96,7 +96,7 @@ class VoiceAllocator {
         return i;
       }
     }
-    return kNotAllocated;
+    return NOT_ALLOCATED;
   }
 
   void Clear() {

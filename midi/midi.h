@@ -53,7 +53,7 @@ const uint8_t kCCOmniModeOn = 0x7d;
 const uint8_t kCCMonoModeOn = 0x7e;
 const uint8_t kCCPolyModeOn = 0x7f;
 
-template<typename Device>
+template<typename Handler>
 class MidiStreamParser {
  public:
   MidiStreamParser() {
@@ -66,7 +66,7 @@ class MidiStreamParser {
     if (byte == 0xfe) {
       return;
     }
-    Device::RawByte(byte);
+    Handler::RawByte(byte);
     // Realtime messages are immediately passed-through, and do not modify the
     // state of the parser.
     if (byte >= 0xf8) {
@@ -99,11 +99,11 @@ class MidiStreamParser {
             break;
         }
         if (running_status_ == 0xf0) {
-          Device::SysExEnd();
+          Handler::SysExEnd();
         }
         running_status_ = byte;
         if (running_status_ == 0xf0) {
-          Device::SysExStart();
+          Handler::SysExStart();
         }
       } else {
         data_[data_size_++] = byte;
@@ -122,7 +122,7 @@ class MidiStreamParser {
  private:
   void MessageReceived(uint8_t status) {
     if (!status) {
-      Device::BozoByte(data_[0]);
+      Handler::BozoByte(data_[0]);
     }
 
     uint8_t hi = status & 0xf0;
@@ -130,63 +130,63 @@ class MidiStreamParser {
 
     // If this is a channel-specific message, check first that the receiver is
     // tuned to this channel.
-    if (hi != 0xf0 && !Device::CheckChannel(lo)) {
-      Device::RawMidiData(status, data_, data_size_, 0);
+    if (hi != 0xf0 && !Handler::CheckChannel(lo)) {
+      Handler::RawMidiData(status, data_, data_size_, 0);
       return;
     }
     if (status != 0xf0 && status != 0xf7) {
-      Device::RawMidiData(status, data_, data_size_, 1);
+      Handler::RawMidiData(status, data_, data_size_, 1);
     }
     switch (hi) {
       case 0x80:
-        Device::NoteOff(lo, data_[0], data_[1]);
+        Handler::NoteOff(lo, data_[0], data_[1]);
         break;
 
       case 0x90:
         if (data_[1]) {
-          Device::NoteOn(lo, data_[0], data_[1]);
+          Handler::NoteOn(lo, data_[0], data_[1]);
         } else {
-          Device::NoteOff(lo, data_[0], 0);
+          Handler::NoteOff(lo, data_[0], 0);
         }
         break;
 
       case 0xa0:
-        Device::Aftertouch(lo, data_[0], data_[1]);
+        Handler::Aftertouch(lo, data_[0], data_[1]);
         break;
 
       case 0xb0:
         switch (data_[0]) {
           case 0x78:
-            Device::AllSoundOff(lo);
+            Handler::AllSoundOff(lo);
             break;
           case 0x79:
-            Device::ResetAllControllers(lo);
+            Handler::ResetAllControllers(lo);
             break;
           case 0x7b:
-            Device::AllNotesOff(lo);
+            Handler::AllNotesOff(lo);
             break;
           default:
-            Device::ControlChange(lo, data_[0], data_[1]);
+            Handler::ControlChange(lo, data_[0], data_[1]);
             break;
         }
         break;
 
       case 0xc0:
-        Device::ProgramChange(lo, data_[0]);
+        Handler::ProgramChange(lo, data_[0]);
         break;
 
       case 0xd0:
-        Device::Aftertouch(lo, data_[0]);
+        Handler::Aftertouch(lo, data_[0]);
         break;
 
       case 0xe0:
-        Device::PitchBend(lo, (static_cast<uint16_t>(data_[1]) << 7) + data_[0]);
+        Handler::PitchBend(lo, (static_cast<uint16_t>(data_[1]) << 7) + data_[0]);
         break;
 
       case 0xf0:
         switch(lo) {
           case 0x0:
-            Device::SysExByte(data_[0]);
+            Handler::SysExByte(data_[0]);
             break;
           case 0x1:
           case 0x2:
@@ -197,27 +197,27 @@ class MidiStreamParser {
             // TODO(pichenettes): implement this if it makes sense.
             break;
           case 0x7:
-            Device::SysExEnd();
+            Handler::SysExEnd();
             break;
           case 0x8:
-            Device::Clock();
+            Handler::Clock();
             break;
           case 0x9:
             break;
           case 0xa:
-            Device::Start();
+            Handler::Start();
             break;
           case 0xb:
-            Device::Continue();
+            Handler::Continue();
             break;
           case 0xc:
-            Device::Stop();
+            Handler::Stop();
             break;
           case 0xe:
-            Device::ActiveSensing();
+            Handler::ActiveSensing();
             break;
           case 0xf:
-            Device::Reset();
+            Handler::Reset();
             break;
         }
         break;

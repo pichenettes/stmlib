@@ -51,7 +51,9 @@
 
 namespace stmlib {
 
-static const uint8_t kFreeSlot = 0xff;
+enum NoteStackFlags {
+  FREE_SLOT = 0xff
+};
 
 struct NoteEntry {
   uint8_t note;
@@ -84,7 +86,7 @@ class NoteStack {
     // Now we are ready to insert the new note. Find a free slot to insert it.
     uint8_t free_slot = 1;
     for (uint8_t i = 1; i <= capacity; ++i) {
-      if (pool_[i].note == kFreeSlot) {
+      if (pool_[i].note == FREE_SLOT) {
         free_slot = i;
         break;
       }
@@ -135,7 +137,7 @@ class NoteStack {
         }
       }
       pool_[current].next_ptr = 0;
-      pool_[current].note = kFreeSlot;
+      pool_[current].note = FREE_SLOT;
       pool_[current].velocity = 0;
       --size_;
     }
@@ -147,7 +149,7 @@ class NoteStack {
     memset(sorted_ptr_ + 1, 0, capacity);
     root_ptr_ = 0;
     for (uint8_t i = 0; i <= capacity; ++i) {
-      pool_[i].note = kFreeSlot;
+      pool_[i].note = FREE_SLOT;
     }
   }
 

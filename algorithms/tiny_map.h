@@ -52,8 +52,7 @@ class TinyMap {
   ~TinyMap() { }
     
   void Init() {
-    memset(map_, EMPTY, capacity * sizeof(Entry));
-    recent_search_ = recent_delete_ = &map_[0];
+    Clear();
   }
   
   void Put(Key key, Value value) {
@@ -77,6 +76,11 @@ class TinyMap {
   
   const Entry* Find(uint8_t key) {
     return Search(key);
+  }
+
+  void Clear() {
+    memset(map_, EMPTY, capacity * sizeof(Entry));
+    recent_search_ = recent_delete_ = &map_[0];
   }
 
  private:

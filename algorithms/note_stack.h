@@ -52,7 +52,10 @@
 namespace stmlib {
 
 enum NoteStackFlags {
-  FREE_SLOT = 0xff
+  NOTE_STACK_PRIORITY_LAST,
+  NOTE_STACK_PRIORITY_LOW,
+  NOTE_STACK_PRIORITY_HIGH,
+  NOTE_STACK_FREE_SLOT = 0xff
 };
 
 struct NoteEntry {
@@ -86,7 +89,7 @@ class NoteStack {
     // Now we are ready to insert the new note. Find a free slot to insert it.
     uint8_t free_slot = 1;
     for (uint8_t i = 1; i <= capacity; ++i) {
-      if (pool_[i].note == FREE_SLOT) {
+      if (pool_[i].note == NOTE_STACK_FREE_SLOT) {
         free_slot = i;
         break;
       }
@@ -137,7 +140,7 @@ class NoteStack {
         }
       }
       pool_[current].next_ptr = 0;
-      pool_[current].note = FREE_SLOT;
+      pool_[current].note = NOTE_STACK_FREE_SLOT;
       pool_[current].velocity = 0;
       --size_;
     }
@@ -149,7 +152,7 @@ class NoteStack {
     memset(sorted_ptr_ + 1, 0, capacity);
     root_ptr_ = 0;
     for (uint8_t i = 0; i <= capacity; ++i) {
-      pool_[i].note = FREE_SLOT;
+      pool_[i].note = NOTE_STACK_FREE_SLOT;
     }
   }
 
@@ -177,7 +180,25 @@ class NoteStack {
   const NoteEntry& note(uint8_t index) const { return pool_[index]; }
   NoteEntry* mutable_note(uint8_t index) { return &pool_[index]; }
   const NoteEntry& dummy() const { return pool_[0]; }
-
+  const NoteEntry& note_by_priority(NoteStackFlags priority) {
+    if (size() == 0) {
+      return dummy();
+    }
+    switch (priority) {
+      case NOTE_STACK_PRIORITY_LAST:
+        return most_recent_note();
+      
+      case NOTE_STACK_PRIORITY_LOW:
+        return sorted_note(0);
+        
+      case NOTE_STACK_PRIORITY_HIGH:
+        return sorted_note(size() - 1);
+      
+      default:
+        return dummy();
+    }
+  }
+  
  private:
   uint8_t size_;
   NoteEntry pool_[capacity + 1];  // First element is a dummy node!

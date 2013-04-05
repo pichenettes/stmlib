@@ -31,7 +31,7 @@ TOOLCHAIN_BIN  = $(TOOLCHAIN_PATH)bin/
 STM32_PATH     = stmlib/third_party/STM
 
 PGM_SERIAL_PORT = /dev/tty.usbserial-A100S09O
-PGM_SERIAL_BAUD_RATE = 115200
+PGM_SERIAL_BAUD_RATE = 1152000
 PGM_SERIAL_VERIFY = -v
 
 # --- Do not modify anything below this point ----------------------------------

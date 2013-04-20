@@ -213,9 +213,6 @@ class MidiStreamParser {
           case 0xc:
             Handler::Stop();
             break;
-          case 0xe:
-            Handler::ActiveSensing();
-            break;
           case 0xf:
             Handler::Reset();
             break;

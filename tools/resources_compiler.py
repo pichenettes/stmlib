@@ -88,7 +88,9 @@ class ResourceEntry(object):
       for i in xrange(0, n_elements, 4):
         f.write('  ');
         f.write(', '.join(
-            '%6d' % self._value[j] for j in xrange(i, min(n_elements, i + 4))))
+            '%6d' % self._value[j] if self._value[j] < 1 << 31 else \
+                '%6dUL' % self._value[j] \
+            for j in xrange(i, min(n_elements, i + 4))))
         f.write(',\n');
       f.write('};\n')
     

@@ -36,14 +36,14 @@
 
 namespace stmlib {
 
-template<size_t size>
+template<size_t buffer_size>
 class StreamBuffer {
  public:
   StreamBuffer() { Clear(); }
   
   void Clear() {
     ptr_ = 0;
-    std::fill(&buffer_[0], &buffer_[size], 0);
+    std::fill(&buffer_[0], &buffer_[buffer_size], 0);
   }
   
   inline size_t position() const {
@@ -57,15 +57,25 @@ class StreamBuffer {
   inline uint8_t* mutable_bytes() {
     return buffer_;
   }
+
+  void Write(const void* data, size_t size) {
+    if (ptr_ + size > buffer_size) {
+      return;
+    }
+    memcpy(&buffer_[ptr_], data, size);
+    ptr_ += size;
+  }
   
   template<typename T>
   void Write(const T& value) {
-    memcpy(&buffer_[ptr_], &value, sizeof(T));
-    ptr_ += sizeof(T);
+    Write(&value, sizeof(T));
   }
 
   template<typename T>
   void Read(T* value) {
+    if (ptr_ + sizeof(T) > buffer_size) {
+      return;
+    }
     memcpy((void*)value, &buffer_[ptr_], sizeof(T));
     ptr_ += sizeof(T);
   }
@@ -77,7 +87,7 @@ class StreamBuffer {
   inline void Rewind() { Seek(0); }
 
  private:
-  uint8_t buffer_[size];
+  uint8_t buffer_[buffer_size];
   size_t ptr_;
 
   DISALLOW_COPY_AND_ASSIGN(StreamBuffer);

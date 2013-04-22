@@ -98,12 +98,16 @@ class MidiStreamParser {
             }
             break;
         }
-        if (running_status_ == 0xf0) {
-          Handler::SysExEnd();
-        }
-        running_status_ = byte;
-        if (running_status_ == 0xf0) {
+        if (byte == 0xf7) {
+          if (running_status_ == 0xf0) {
+            Handler::SysExEnd();
+          }
+          running_status_ = 0;
+        } else if (byte == 0xf0) {
+          running_status_ = 0xf0;
           Handler::SysExStart();
+        } else {
+          running_status_ = byte;
         }
       } else {
         data_[data_size_++] = byte;
@@ -195,9 +199,6 @@ class MidiStreamParser {
           case 0x5:
           case 0x6:
             // TODO(pichenettes): implement this if it makes sense.
-            break;
-          case 0x7:
-            Handler::SysExEnd();
             break;
           case 0x8:
             Handler::Clock();

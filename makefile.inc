@@ -362,9 +362,9 @@ debug_server: $(TARGET_BIN)
 	openocd \
 		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
 		-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
-		-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
-		-c "reset halt"
+		-c "init" \
+		-c "reset" \
+		-c "halt"
 
 debug_client:
 	$(DB) --eval-command="target remote localhost:3333" $(TARGET_ELF)

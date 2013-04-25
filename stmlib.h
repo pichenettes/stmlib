@@ -102,6 +102,8 @@ class scoped_resource {
   }
 };
 
+#define IN_RAM __attribute__ ((section (".data")))
+
 }  // namespace stmlib
 
 #endif   // STMLIB_STMLIB_H_

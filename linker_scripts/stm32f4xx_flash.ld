@@ -85,6 +85,8 @@ SECTIONS
         *(.rodata*)
         *(.glue_7)
         *(.glue_7t)
+        KEEP (*(.init))
+        KEEP (*(.fini))
 
       . = ALIGN(4);
      _etext = .;

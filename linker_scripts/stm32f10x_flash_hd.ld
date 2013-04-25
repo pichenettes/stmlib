@@ -16,6 +16,8 @@ SECTIONS
     KEEP(*(.isr_vector))
     *(.text*)
     *(.rodata*)
+    KEEP (*(.init))
+    KEEP (*(.fini))
     _etext = .;
     _sidata = .;
   } > FLASH

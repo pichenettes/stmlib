@@ -17,6 +17,8 @@ SECTIONS
     *(.text*)
     *(.rodata*)
     *(.flashtext*)
+    KEEP (*(.init))
+    KEEP (*(.fini))
     _etext = .;
     _sidata = .;
   } > FLASH

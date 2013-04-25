@@ -135,9 +135,9 @@ INCFLAGS       = \
 CCFLAGS         = \
 			-g -O2 -Wall -Werror \
 			-fasm \
-			-fdata-sections \
 			-finline \
 			-finline-functions-called-once \
+			-fdata-sections \
 			-ffunction-sections \
 			-fno-unroll-loops \
 			-fshort-enums \
@@ -330,7 +330,7 @@ image_serial:
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
-		-r -l 18000 image.bin
+		-r -l 32768 image.bin
 
 upload_combo_serial: $(COMBO_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \

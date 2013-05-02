@@ -350,6 +350,7 @@ UPLOAD_JTAG_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
 			-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
+			-c "verify_image $(TARGET_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 UPLOAD_JTAG_COMBO_CMD = openocd \
@@ -357,6 +358,7 @@ UPLOAD_JTAG_COMBO_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
 			-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
+			-c "verify_image $(COMBO_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 debug_server: $(TARGET_BIN)

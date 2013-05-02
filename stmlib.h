@@ -36,12 +36,29 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
+#define CLIP(x) if (x < -32767) x = -32767; if (x > 32767) x = 32767;
+
+#define CONSTRAIN(var, min, max) \
+  if (var < (min)) { \
+    var = (min); \
+  } else if (var > (max)) { \
+    var = (max); \
+  }
+
+#define STATIC_ASSERT(expression) StaticAssertImplementation<(expression)>()
+
+#ifndef TEST
+#define IN_RAM __attribute__ ((section (".data")))
+#else
+#define IN_RAM
+#endif  // TEST
+
 template<bool b>
 inline void StaticAssertImplementation() {
 	char static_assert_size_mismatch[b] = { 0 };
 }
  
-#define STATIC_ASSERT(expression) StaticAssertImplementation<(expression)>()
+namespace stmlib {
 
 typedef union {
   uint16_t value;
@@ -59,50 +76,6 @@ template<uint32_t a, uint32_t b, uint32_t c, uint32_t d>
 struct FourCC {
   static const uint32_t value = (((((d << 8) | c) << 8) | b) << 8) | a;
 };
-
-namespace stmlib {
-
-template<uint8_t size>
-struct DataTypeForSize {
-  typedef uint16_t Type;
-};
-
-template<> struct DataTypeForSize<1> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<2> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<3> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<4> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<5> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<6> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<7> { typedef uint8_t Type; };
-template<> struct DataTypeForSize<8> { typedef uint8_t Type; };
-
-enum DataOrder {
-  MSB_FIRST = 0,
-  LSB_FIRST = 1
-};
-
-enum DigitalValue {
-  LOW = 0,
-  HIGH = 1
-};
-
-// Some classes (SPI, shift register) have a notion of communication session -
-// Begin is called, several R/W are done, and then End is called to pull high
-// a chip select or latch line. This template ensures that any path leaving a
-// block of code will release the resource.
-template<typename T>
-class scoped_resource {
- public:
-  scoped_resource() {
-    T::Begin();
-  }
-  
-  ~scoped_resource() {
-    T::End();
-  }
-};
-
-#define IN_RAM __attribute__ ((section (".data")))
 
 }  // namespace stmlib
 

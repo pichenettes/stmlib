@@ -32,8 +32,6 @@
 
 #include "stmlib/stmlib.h"
 
-#define CLIP(x) if (x < -32767) x = -32767; if (x > 32767) x = 32767;
-
 namespace stmlib {
 
 inline int16_t Interpolate824(const int16_t* table, uint32_t phase)

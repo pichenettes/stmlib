@@ -32,18 +32,20 @@
 // device - which can be updated every second!
 //
 // If the amount of data to save is small, it is more efficient to just append
-// versions upon versions after each other. For example, if the buffer to save
-// is 16 bytes long, it is recommended to erase a page, and fill it
+// versions after each other without overwriting. For example, if the buffer to
+// save is 16 bytes long, it is recommended to erase a page, and fill it
 // progressively at each save request with the blocks of data until it is full
 // and the page can be erased again. This way, only 1 erase will be needed
 // every 64th call to the save function. This strategy is implemented in
 // ParsimoniousLoad and ParsimoniousSave, and practically extends the life of
-// the flash memory life by a 40x factor in Braids.
+// the flash memory by a 40x factor in Braids.
 
 #ifndef STMLIB_SYSTEM_STORAGE_H_
 #define STMLIB_SYSTEM_STORAGE_H_
 
 #include <stm32f10x_conf.h>
+
+#include <cstring>
 
 #include "stmlib/stmlib.h"
 #include "stmlib/system/flash_programming.h"
@@ -137,7 +139,7 @@ class Storage {
     // Try from the end of the reserved area until we find a block with 
     // the right checksum and the right version index. 
     for (int16_t candidate_version = (num_pages * PAGE_SIZE / block_size) - 1;
-         candidate_version >= 0; 
+         candidate_version >= 0;
          --candidate_version) {
       uint32_t start = FLASH_STORAGE_BASE + candidate_version * block_size;
       

@@ -330,7 +330,7 @@ image_serial:
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
-		-r -l 32768 image.bin
+		-r -l 131072 image.bin
 
 upload_combo_serial: $(COMBO_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
@@ -344,6 +344,12 @@ upload_combo_serial_no_erase: $(COMBO_BIN)
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-w $(COMBO_BIN) $(PGM_SERIAL_VERIFY)
+
+BLANK_JTAG_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 UPLOAD_JTAG_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \

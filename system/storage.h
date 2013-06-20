@@ -168,11 +168,6 @@ class Storage {
       address += 4;
       size -= 4;
     }
-    // If the size is not a multiple of 4, write tail.
-    if (size) {
-      FLASH_ProgramWord(address, *words);
-    }
-    
     // Write checksum.
     uint16_t checksum = Checksum(data, data_size);
     FLASH_ProgramHalfWord(start + data_size, checksum);

@@ -345,7 +345,7 @@ upload_combo_serial_no_erase: $(COMBO_BIN)
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-w $(COMBO_BIN) $(PGM_SERIAL_VERIFY)
 
-BLANK_JTAG_CMD = openocd \
+ERASE_JTAG_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
@@ -382,6 +382,9 @@ debug_client:
 # "Error: error executing stm32x flash write algorithm" error. Retrying
 # immediately always solves it.
 
+erase_jtag:
+	$(ERASE_JTAG_CMD)
+
 upload_jtag: $(TARGET_BIN)
 	$(UPLOAD_JTAG_CMD) || $(UPLOAD_JTAG_CMD)
 
@@ -396,6 +399,7 @@ reload_ftdi:
 	sudo kextload -b com.FTDI.driver.FTDIUSBSerialDriver
 
 .PHONY: upload upload_serial upload_serial_no_erase upload_jtag
-.PHONY: upload_bundle_serial upload_jtag
+.PHONY: upload_bundle_serial upload_bundle_jtag
+.PHONY: erase_jtag
 .PHONY: kill_ftdi reload_ftdi
 .PHONY: debug_client debug_server

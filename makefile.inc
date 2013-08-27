@@ -311,6 +311,12 @@ $(COMBO_BIN):  $(TARGET_HEX) $(BOOTLOADER_HEX)
 
 upload:	$(UPLOAD_COMMAND)
 
+image_serial:
+	python $(STM32LOADER_PATH)stm32loader.py \
+		-p $(PGM_SERIAL_PORT) \
+		-b $(PGM_SERIAL_BAUD_RATE) \
+		-r -l 131072 image.bin
+
 upload_serial: $(TARGET_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
@@ -325,12 +331,6 @@ upload_serial_no_erase: $(TARGET_BIN)
 		-b $(PGM_SERIAL_BAUD_RATE) \
 		-a $(BASE_ADDRESS) \
 		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
-
-image_serial:
-	python $(STM32LOADER_PATH)stm32loader.py \
-		-p $(PGM_SERIAL_PORT) \
-		-b $(PGM_SERIAL_BAUD_RATE) \
-		-r -l 131072 image.bin
 
 upload_combo_serial: $(COMBO_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
@@ -349,12 +349,14 @@ ERASE_JTAG_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 UPLOAD_JTAG_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 			-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
 			-c "verify_image $(TARGET_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
@@ -363,7 +365,24 @@ UPLOAD_JTAG_COMBO_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
 			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 			-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
+			-c "verify_image $(COMBO_BIN)" \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+UPLOAD_JTAG_NO_ERASE_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
+			-c "verify_image $(TARGET_BIN)" \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+UPLOAD_JTAG_COMBO_NO_ERASE_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
 			-c "verify_image $(COMBO_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
@@ -390,6 +409,12 @@ upload_jtag: $(TARGET_BIN)
 
 upload_combo_jtag: $(COMBO_BIN)
 	$(UPLOAD_JTAG_COMBO_CMD) || $(UPLOAD_JTAG_COMBO_CMD)
+
+upload_jtag_no_erase: $(TARGET_BIN)
+	$(UPLOAD_JTAG_NO_ERASE_CMD) || $(UPLOAD_JTAG_NO_ERASE_CMD)
+
+upload_combo_jtag_no_erase: $(COMBO_BIN)
+	$(UPLOAD_JTAG_COMBO_NO_ERASE_CMD) || $(UPLOAD_JTAG_COMBO_NO_ERASE_CMD)
 
 # Phony target for killing the system FTDI driver on OS X.
 kill_ftdi:

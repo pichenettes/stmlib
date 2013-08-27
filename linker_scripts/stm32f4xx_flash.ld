@@ -110,7 +110,7 @@ SECTIONS
       . = ALIGN(4);
         /* This is used by the startup in order to initialize the .data secion */
         _sdata = . ;
-        (.ramtext*)
+        *(.ramtext*)
         . = ALIGN(4);
         *(.data*)        
         *(.data.*)

@@ -137,6 +137,6 @@ class VoiceAllocator {
   DISALLOW_COPY_AND_ASSIGN(VoiceAllocator);
 };
 
-}  // namespace ambika
+}  // namespace stmlib
 
 #endif  // STMLIB_ALGORITHMS_VOICE_ALLOCATOR_H_

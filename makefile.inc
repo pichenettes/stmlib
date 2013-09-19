@@ -386,6 +386,14 @@ UPLOAD_JTAG_COMBO_NO_ERASE_CMD = openocd \
 			-c "verify_image $(COMBO_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
+image_jtag:
+	openocd \
+		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+		-c "dump_image image.bin 0x08000000 131072" \
+		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
 debug_server: $(TARGET_BIN)
 	openocd \
 		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \

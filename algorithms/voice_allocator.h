@@ -30,6 +30,7 @@
 #define STMLIB_ALGORITHMS_VOICE_ALLOCATOR_H_
 
 #include "stmlib/stmlib.h"
+#include <cstring>
 
 namespace stmlib {
 

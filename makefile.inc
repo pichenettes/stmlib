@@ -26,7 +26,7 @@
 # Files and directories
 # ------------------------------------------------------------------------------
 
-TOOLCHAIN_PATH = /usr/local/arm/
+TOOLCHAIN_PATH ?= /usr/local/arm/
 TOOLCHAIN_BIN  = $(TOOLCHAIN_PATH)bin/
 STM32_PATH     = stmlib/third_party/STM
 

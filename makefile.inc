@@ -386,6 +386,26 @@ UPLOAD_JTAG_COMBO_NO_ERASE_CMD = openocd \
 			-c "verify_image $(COMBO_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
+UPLOAD_JTAG_ERASE_FIRST_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-c "flash erase_address 0x08000000 16384" \
+			-c "reset" \
+			-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
+			-c "verify_image $(TARGET_BIN)" \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+UPLOAD_JTAG_COMBO_ERASE_FIRST_CMD = openocd \
+			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY).cfg \
+			-f $(OPENOCD_SCRIPTS_PATH)prelude_$(FAMILY).cfg \
+			-c "flash erase_address 0x08000000 16384" \
+			-c "reset" \
+			-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
+			-c "verify_image $(COMBO_BIN)" \
+			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
 image_jtag:
 	openocd \
 		-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \
@@ -423,6 +443,12 @@ upload_jtag_no_erase: $(TARGET_BIN)
 
 upload_combo_jtag_no_erase: $(COMBO_BIN)
 	$(UPLOAD_JTAG_COMBO_NO_ERASE_CMD) || $(UPLOAD_JTAG_COMBO_NO_ERASE_CMD)
+
+upload_jtag_erase_first: $(TARGET_BIN)
+	$(UPLOAD_JTAG_ERASE_FIRST_CMD) || $(UPLOAD_JTAG_ERASE_FIRST_CMD)
+
+upload_combo_jtag_erase_first: $(COMBO_BIN)
+	$(UPLOAD_JTAG_COMBO_ERASE_FIRST_CMD) || $(UPLOAD_JTAG_COMBO_ERASE_FIRST_CMD)
 
 # Phony target for killing the system FTDI driver on OS X.
 kill_ftdi:

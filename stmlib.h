@@ -48,7 +48,7 @@
 #define STATIC_ASSERT(expression) StaticAssertImplementation<(expression)>()
 
 #ifndef TEST
-#define IN_RAM __attribute__ ((section (".data")))
+#define IN_RAM __attribute__ ((section (".ramtext")))
 #else
 #define IN_RAM
 #endif  // TEST

@@ -30,7 +30,9 @@
 #define STMLIB_ALGORITHMS_PATTERN_PREDICTOR_H_
 
 #include "stmlib/stmlib.h"
+
 #include <algorithm>
+#include <cstdlib>
 
 namespace stmlib {
   

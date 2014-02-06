@@ -30,6 +30,7 @@
 #define STMLIB_UTILS_RING_BUFFER_H_
 
 #include "stmlib/stmlib.h"
+#include <algorithm>
 
 namespace stmlib {
 
@@ -78,7 +79,36 @@ class RingBuffer {
   inline void Flush() {
     write_ptr_ = read_ptr_;
   }
+  
+  inline void ImmediateRead(T* destination, size_t num_elements) {
+    size_t r = read_ptr_;
+    size_t read = num_elements;
 
+    if (r + read > size) {
+      read = size - r;
+    }
+    std::copy(&buffer_[r], &buffer_[r + read], destination);
+    if (read != num_elements) {
+      std::copy(&buffer_[0], &buffer_[num_elements - read], destination + read);
+    }
+    read_ptr_ = (r + num_elements) % size;
+  }
+
+  inline void Overwrite(const T* source, size_t num_elements) {
+    size_t w = write_ptr_;
+    size_t written = num_elements;
+
+    if (w + written > size) {
+      written = size - w;
+    }
+    std::copy(source, source + written, &buffer_[w]);
+    if (written != num_elements) {
+      std::copy(source + written, source + num_elements, &buffer_[0]);
+    }
+    
+    write_ptr_ = (w + num_elements) % size;
+  }
+  
  private:
   T buffer_[size];
   volatile size_t read_ptr_;

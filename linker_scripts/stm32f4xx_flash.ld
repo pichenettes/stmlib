@@ -50,7 +50,7 @@ SECTIONS
      _sidata = _etext;
   } >FLASH
   
-  .data  : AT ( _sidata )
+  .data : AT ( _sidata )
   {
     . = ALIGN(4);
     _sdata = . ;

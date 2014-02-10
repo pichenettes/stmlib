@@ -53,6 +53,10 @@
 #define IN_RAM
 #endif  // TEST
 
+#define UNROLL2(x) x; x;
+#define UNROLL4(x) x; x; x; x;
+#define UNROLL8(x) x; x; x; x; x; x; x; x;
+
 template<bool b>
 inline void StaticAssertImplementation() {
 	char static_assert_size_mismatch[b] = { 0 };

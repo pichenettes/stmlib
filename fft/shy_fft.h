@@ -53,6 +53,19 @@ template<>
 struct Log2<1> { enum { value = 0 }; };
 
 
+// Bit reversal LUT size.
+template<size_t> struct BitReversalLut { enum { size = 256 }; };
+template<> struct BitReversalLut<0> { enum { size = 1 }; };
+template<> struct BitReversalLut<1> { enum { size = 1 }; };
+template<> struct BitReversalLut<2> { enum { size = 1 }; };
+template<> struct BitReversalLut<3> { enum { size = 2 }; };
+template<> struct BitReversalLut<4> { enum { size = 4 }; };
+template<> struct BitReversalLut<5> { enum { size = 8 }; };
+template<> struct BitReversalLut<6> { enum { size = 16 }; };
+template<> struct BitReversalLut<7> { enum { size = 32 }; };
+template<> struct BitReversalLut<8> { enum { size = 64 }; };
+
+
 // Typed math functions and constants.
 template<typename T>
 struct Math {
@@ -192,8 +205,6 @@ struct RotationPhasor<T, 3> {
   inline T sin() const { return 0.0; }
 };
 
-
-
 // Direct transform
 template<typename T, size_t num_passes, typename Phasor>
 struct DirectTransform {
@@ -207,7 +218,7 @@ struct DirectTransform {
       const T* input,
       T* output,
       T* workspace,
-      const short* bit_reversal_lut,
+      const uint8_t* bit_rev,
       Phasor* phasor) {
     T* s;
     T* d;
@@ -217,10 +228,12 @@ struct DirectTransform {
     d = output;
     for (size_t i = 0; i < size; i += 4) {
       const T* s = input;
-      short r0 = *bit_reversal_lut++;
-      short r1 = r0 + 2 * (size >> 2);
-      short r2 = r0 + 1 * (size >> 2);
-      short r3 = r0 + 3 * (size >> 2);
+      size_t r0 = num_passes <= 8
+          ? bit_rev[i >> 2]
+          : ((bit_rev[i & 0xff] << 8) | bit_rev[i >> 8]) >> (16 - num_passes);
+      size_t r1 = r0 + 2 * (size >> 2);
+      size_t r2 = r0 + 1 * (size >> 2);
+      size_t r3 = r0 + 3 * (size >> 2);
       
       d[1] = s[r0] - s[r1];
       d[3] = s[r2] - s[r3];
@@ -302,14 +315,14 @@ struct DirectTransform {
 
 template<typename T, typename Phasor>
 struct DirectTransform<T, 0, Phasor> {
-  void operator()(const T* i, T* o, T*, const short*, Phasor*) {
+  void operator()(const T* i, T* o, T*, const uint8_t*, Phasor*) {
     o[0] = i[0];
   }
 };
 
 template<typename T, typename Phasor>
 struct DirectTransform<T, 1, Phasor> {
-  void operator()(const T* i, T* o, T*, const short*, Phasor*) {
+  void operator()(const T* i, T* o, T*, const uint8_t*, Phasor*) {
     o[0] = i[0] + i[1];
     o[1] = i[0] - i[1];
   }
@@ -317,7 +330,7 @@ struct DirectTransform<T, 1, Phasor> {
 
 template<typename T, typename Phasor>
 struct DirectTransform<T, 2, Phasor> {
-  void operator()(const T* i, T* o, T*, const short*, Phasor*) {
+  void operator()(const T* i, T* o, T*, const uint8_t*, Phasor*) {
     o[1] = i[0] - i[2];
     o[3] = i[1] - i[3];
     T a = i[0] + i[2];
@@ -341,7 +354,7 @@ struct InverseTransform {
       const T* input,
       T* output,
       T* workspace,
-      const short* bit_reversal_lut,
+      const uint8_t* bit_rev,
       Phasor* phasor) {
     T* s = (T*)(input);
     T* d = output;
@@ -416,10 +429,12 @@ struct InverseTransform {
     s = workspace;
     d = output;
     for (size_t i = 0; i < size; i += 4) {
-      short r0 = *bit_reversal_lut++;
-      short r1 = r0 + 2 * (size >> 2);
-      short r2 = r0 + 1 * (size >> 2);
-      short r3 = r0 + 3 * (size >> 2);
+      size_t r0 = num_passes <= 8
+          ? bit_rev[i >> 2]
+          : ((bit_rev[i & 0xff] << 8) | bit_rev[i >> 8]) >> (16 - num_passes);
+      size_t r1 = r0 + 2 * (size >> 2);
+      size_t r2 = r0 + 1 * (size >> 2);
+      size_t r3 = r0 + 3 * (size >> 2);
       
       T b_0 = s[0] + s[2];
       T b_2 = s[0] - s[2];
@@ -437,14 +452,14 @@ struct InverseTransform {
 
 template<typename T, typename Phasor>
 struct InverseTransform<T, 0, Phasor> {
-  void operator()(const T* i, T* o, T*, const short*, Phasor*) {
+  void operator()(const T* i, T* o, T*, const uint8_t*, Phasor*) {
     o[0] = i[0];
   }
 };
 
 template<typename T, typename Phasor>
 struct InverseTransform<T, 1, Phasor> {
-  void operator()(const T* i, T* o, T*, const short*, Phasor*) {
+  void operator()(const T* i, T* o, T*, const uint8_t*, Phasor*) {
     o[0] = i[0] + i[1];
     o[1] = i[0] - i[1];
   }
@@ -452,7 +467,7 @@ struct InverseTransform<T, 1, Phasor> {
 
 template<typename T, typename Phasor>
 struct InverseTransform<T, 2, Phasor> {
-  void operator()(const T* i, T* o, T*, const short*, Phasor*) {
+  void operator()(const T* i, T* o, T*, const uint8_t*, Phasor*) {
     T a = i[0] + i[2];
     T b = i[0] - i[2];
     
@@ -479,21 +494,21 @@ class ShyFFT {
   ~ShyFFT() { }
   
   void Init() {
-    phasor_.Init();
-    bit_reversal_lut_[0] = 0;
-    for (size_t i = 1; i < (size >> 2) + 1; ++i) {
-      short word = 0;
-      short source = i << 2;
-      short destination = size >> 1;
+    bit_rev_[0] = 0;
+    for (size_t i = 1; i < sizeof(bit_rev_); ++i) {
+      uint8_t byte = 0;
+      uint8_t source = (num_passes <= 8) ? (i << 2) : i;
+      uint8_t destination = (num_passes <= 8) ? size >> 1 : 128;
       while (source) {
         if (source & 1) {
-          word |= destination;
+          byte |= destination;
         }
         destination >>= 1;
         source >>= 1;
       }
-      bit_reversal_lut_[i] = word;
+      bit_rev_[i] = byte;
     }
+    phasor_.Init();
   }
   
   void Direct(const T* input, T* output, T* workspace) {
@@ -502,7 +517,7 @@ class ShyFFT {
         input,
         output,
         workspace,
-        &bit_reversal_lut_[0],
+        &bit_rev_[0],
         &phasor_);
   }
   
@@ -512,7 +527,7 @@ class ShyFFT {
         input,
         output,
         input,
-        &bit_reversal_lut_[0],
+        &bit_rev_[0],
         &phasor_);
   }
   
@@ -522,7 +537,7 @@ class ShyFFT {
         input,
         output,
         workspace,
-        &bit_reversal_lut_[0],
+        &bit_rev_[0],
         &phasor_);
   }
   
@@ -532,13 +547,13 @@ class ShyFFT {
         input,
         output,
         input,
-        &bit_reversal_lut_[0],
+        &bit_rev_[0],
         &phasor_);
   }
 
  private:
   PhasorType phasor_;
-  short bit_reversal_lut_[(size >> 2) + 1];
+  uint8_t bit_rev_[BitReversalLut<num_passes>::size];
 
   DISALLOW_COPY_AND_ASSIGN(ShyFFT);
 };

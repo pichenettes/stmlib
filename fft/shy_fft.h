@@ -37,6 +37,7 @@
 #include "stmlib/stmlib.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace stmlib {
 
@@ -498,7 +499,10 @@ class ShyFFT {
     for (size_t i = 1; i < sizeof(bit_rev_); ++i) {
       uint8_t byte = 0;
       uint8_t source = (num_passes <= 8) ? (i << 2) : i;
-      uint8_t destination = (num_passes <= 8) ? size >> 1 : 128;
+      uint8_t destination = 128;
+      if (num_passes <= 8) {
+        destination = static_cast<uint8_t>(size >> 1);
+      }
       while (source) {
         if (source & 1) {
           byte |= destination;

@@ -55,10 +55,7 @@ struct Log2<1> { enum { value = 0 }; };
 
 
 // Bit reversal LUT size.
-template<size_t> struct BitReversalLut { enum { size = 256 }; };
-template<> struct BitReversalLut<0> { enum { size = 1 }; };
-template<> struct BitReversalLut<1> { enum { size = 1 }; };
-template<> struct BitReversalLut<2> { enum { size = 1 }; };
+template<size_t> struct BitReversalLut { enum { size = 1 }; };
 template<> struct BitReversalLut<3> { enum { size = 2 }; };
 template<> struct BitReversalLut<4> { enum { size = 4 }; };
 template<> struct BitReversalLut<5> { enum { size = 8 }; };
@@ -498,11 +495,8 @@ class ShyFFT {
     bit_rev_[0] = 0;
     for (size_t i = 1; i < sizeof(bit_rev_); ++i) {
       uint8_t byte = 0;
-      uint8_t source = (num_passes <= 8) ? (i << 2) : i;
-      uint8_t destination = 128;
-      if (num_passes <= 8) {
-        destination = static_cast<uint8_t>(size >> 1);
-      }
+      uint8_t source = i << 2;
+      uint8_t destination = static_cast<uint8_t>(size >> 1);
       while (source) {
         if (source & 1) {
           byte |= destination;
@@ -521,7 +515,7 @@ class ShyFFT {
         input,
         output,
         workspace,
-        &bit_rev_[0],
+        num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
         &phasor_);
   }
   
@@ -531,7 +525,7 @@ class ShyFFT {
         input,
         output,
         input,
-        &bit_rev_[0],
+        num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
         &phasor_);
   }
   
@@ -541,7 +535,7 @@ class ShyFFT {
         input,
         output,
         workspace,
-        &bit_rev_[0],
+        num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
         &phasor_);
   }
   
@@ -551,15 +545,24 @@ class ShyFFT {
         input,
         output,
         input,
-        &bit_rev_[0],
+        num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
         &phasor_);
   }
 
  private:
   PhasorType phasor_;
   uint8_t bit_rev_[BitReversalLut<num_passes>::size];
+  static const uint8_t bit_rev_256_lut_[256];
 
   DISALLOW_COPY_AND_ASSIGN(ShyFFT);
+};
+
+template<typename T, size_t size, template <typename, size_t> class Phasor>
+const uint8_t ShyFFT<T, size, Phasor>::bit_rev_256_lut_[256] = {
+#define R2(n) n, n + 2*64, n + 1*64, n + 3*64
+#define R4(n) R2(n), R2(n + 2*16), R2(n + 1*16), R2(n + 3*16)
+#define R6(n) R4(n), R4(n + 2*4 ), R4(n + 1*4 ), R4(n + 3*4 )
+R6(0), R6(2), R6(1), R6(3)
 };
 
 }  // namespace stmlib

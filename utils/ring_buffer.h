@@ -117,6 +117,27 @@ class RingBuffer {
   DISALLOW_COPY_AND_ASSIGN(RingBuffer);
 };
 
+template<typename T>
+class RingBuffer<T, 0> {
+ public:
+  RingBuffer() { }
+  
+  inline void Init() { }
+  inline size_t capacity() const { return 0; }
+  inline size_t writable() const { return 0; }
+  inline size_t readable() const { return 0; }
+  inline void Write(T v) { }
+  inline void Overwrite(T v) { }
+  inline T Read() { return T(0); }
+  inline T ImmediateRead() { return T(0); }
+  inline void Flush() { }
+  inline void ImmediateRead(T* destination, size_t num_elements) { }
+  inline void Overwrite(const T* source, size_t num_elements) { }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(RingBuffer);
+};
+
 }  // namespace stmlib
 
 #endif   // STMLIB_UTILS_RING_BUFFER_H_

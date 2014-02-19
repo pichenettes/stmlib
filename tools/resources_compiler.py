@@ -79,7 +79,17 @@ class ResourceEntry(object):
       return
     
     declaration = self.declaration
-    if self._table.python_type == str:
+    if self._table.python_type == float:
+      f.write('%(declaration)s = {\n' % locals())
+      n_elements = len(self._value)
+      for i in xrange(0, n_elements, 4):
+        f.write('  ');
+        f.write(', '.join(
+            '%5.8ff' % self._value[j] \
+            for j in xrange(i, min(n_elements, i + 4))))
+        f.write(',\n');
+      f.write('};\n')
+    elif self._table.python_type == str:
       value = self._value
       f.write('static %(declaration)s = "%(value)s";\n' % locals())
     else:

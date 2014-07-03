@@ -85,7 +85,7 @@ class ResourceEntry(object):
       for i in xrange(0, n_elements, 4):
         f.write('  ');
         f.write(', '.join(
-            '%5.8ff' % self._value[j] \
+            '% 16.9e' % self._value[j] \
             for j in xrange(i, min(n_elements, i + 4))))
         f.write(',\n');
       f.write('};\n')

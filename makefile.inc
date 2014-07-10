@@ -76,13 +76,18 @@ BOOTLOADER_HEX = $(BUILD_ROOT)$(BOOTLOADER)/$(BOOTLOADER).hex
 TARGET_SIZE    = $(BUILD_DIR)$(TARGET).size
 TARGETS        = $(BUILD_DIR)$(TARGET).*
 DEP_FILE       = $(BUILD_DIR)depends.mk
+
+# ------------------------------------------------------------------------------
+# Platform specific flags
+# ------------------------------------------------------------------------------
+
 ifeq ($(FAMILY),f4xx)
 
 MODEL_DEFINE = STM32F4XX
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f4xx.o
 LINKER_SCRIPT = stmlib/linker_scripts/stm32f4xx_flash$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F4xx_StdPeriph_Driver
-ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork
+ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork -funroll-loops
 ARCH_DEFINE = GCC_ARMCM4
 
 else
@@ -98,7 +103,7 @@ endif
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f10x_$(DENSITY).o
 LINKER_SCRIPT = stmlib/linker_scripts/stm32f10x_flash_$(DENSITY)$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F10x_StdPeriph_Driver
-ARCHFLAGS = -mcpu=cortex-m3 -mthumb
+ARCHFLAGS = -mcpu=cortex-m3 -mthumb -fno-unroll-loops
 ARCH_DEFINE = GCC_ARMCM3
 
 endif
@@ -139,7 +144,6 @@ CCFLAGS         = \
 			-finline-functions-called-once \
 			-fdata-sections \
 			-ffunction-sections \
-			-fno-unroll-loops \
 			-fshort-enums \
 			-fno-move-loop-invariants \
 			$(INCFLAGS) \

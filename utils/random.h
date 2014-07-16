@@ -50,6 +50,10 @@ class Random {
     return static_cast<int16_t>(GetWord() >> 16);
   }
 
+  static inline float GetFloat() {
+    return static_cast<float>(GetWord()) / 4294967296.0f;
+  }
+
  private:
   static uint32_t rng_state_;
 

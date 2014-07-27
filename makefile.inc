@@ -138,7 +138,7 @@ INCFLAGS       = \
 			-D$(SYSCLOCK)=$(F_CPU)
 
 CCFLAGS         = \
-			-g -O2 -Wall -Werror \
+			-g -O2 -Wall -Werror -Wno-unused-local-typedefs \
 			-fasm \
 			-finline \
 			-finline-functions-called-once \

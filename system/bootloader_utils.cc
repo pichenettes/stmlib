@@ -26,11 +26,13 @@
 //
 // Function for jumping from bootloader code to application code.
 
-#ifndef STM32F4XX
-
 #include "stmlib/system/bootloader_utils.h"
 
-#include <stm32f10x_conf.h>
+#ifndef STM32F4XX
+  #include <stm32f10x_conf.h>
+#else
+  #include <stm32f4xx_conf.h>
+#endif
 
 namespace stmlib {
 
@@ -94,5 +96,3 @@ void JumpTo(uint32_t address) {
 }
 
 }  // namespace stmlib
-
-#endif  // #ifndef STM32F4XX

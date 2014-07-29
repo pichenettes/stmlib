@@ -45,6 +45,26 @@ inline float SemitonesToRatio(float semitones) {
       lut_pitch_ratio_low[static_cast<int32_t>(pitch_fractional * 256.0f)];
 }
 
+inline void TimbreControl(
+    float amount,
+    float min_frequency,
+    float* lp_f, float* hp_f) {
+  float f = amount - 0.5f;
+  f = f * f * 4.0f;
+  f = amount < 0.5f ? 1.0f - f : f;
+  float f_cut = min_frequency * SemitonesToRatio(112.0f * f);
+  if (f_cut >= 0.49f) {
+    f_cut = 0.49f;
+  }
+  if (amount < 0.5f) {
+    *lp_f = f_cut;
+    *hp_f = min_frequency;
+  } else {
+    *lp_f = 0.49f;
+    *hp_f = f_cut;
+  }
+}
+
 }  // namespace stmlib
 
 #endif  // STMLIB_DSP_UNITS_H_

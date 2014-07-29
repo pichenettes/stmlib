@@ -31,7 +31,7 @@ TOOLCHAIN_BIN  = $(TOOLCHAIN_PATH)bin/
 STM32_PATH     = stmlib/third_party/STM
 
 PGM_SERIAL_PORT = /dev/tty.usbserial-A100S09O
-PGM_SERIAL_BAUD_RATE = 1152000
+PGM_SERIAL_BAUD_RATE = 115200
 PGM_SERIAL_VERIFY = -v
 
 # --- Do not modify anything below this point ----------------------------------
@@ -329,29 +329,29 @@ upload_serial: $(TARGET_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
-		-e \
+		-e $(PGM_SERIAL_VERIFY) \
 		-a $(BASE_ADDRESS) \
-		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
+		-w $(TARGET_BIN)
 
 upload_serial_no_erase: $(TARGET_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
-		-b $(PGM_SERIAL_BAUD_RATE) \
+		-b $(PGM_SERIAL_BAUD_RATE) $(PGM_SERIAL_VERIFY)\
 		-a $(BASE_ADDRESS) \
-		-w $(TARGET_BIN) $(PGM_SERIAL_VERIFY)
+		-w $(TARGET_BIN)
 
 upload_combo_serial: $(COMBO_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
 		-b $(PGM_SERIAL_BAUD_RATE) \
-		-e \
-		-w $(COMBO_BIN) $(PGM_SERIAL_VERIFY)
+		-e $(PGM_SERIAL_VERIFY) \
+		-w $(COMBO_BIN)
 
 upload_combo_serial_no_erase: $(COMBO_BIN)
 	python $(STM32LOADER_PATH)stm32loader.py \
 		-p $(PGM_SERIAL_PORT) \
-		-b $(PGM_SERIAL_BAUD_RATE) \
-		-w $(COMBO_BIN) $(PGM_SERIAL_VERIFY)
+		-b $(PGM_SERIAL_BAUD_RATE) $(PGM_SERIAL_VERIFY)\
+		-w $(COMBO_BIN)
 
 ERASE_JTAG_CMD = openocd \
 			-f $(OPENOCD_SCRIPTS_PATH)interface.cfg \

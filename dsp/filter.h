@@ -25,6 +25,7 @@
 // -----------------------------------------------------------------------------
 //
 // Zero-delay-feedback filters (one pole and SVF).
+// Naive SVF.
 
 #ifndef STMLIB_DSP_FILTER_H_
 #define STMLIB_DSP_FILTER_H_
@@ -131,6 +132,8 @@ class OnePole {
   DISALLOW_COPY_AND_ASSIGN(OnePole);
 };
 
+
+
 class Svf {
  public:
   Svf() { }
@@ -217,6 +220,66 @@ class Svf {
   
   DISALLOW_COPY_AND_ASSIGN(Svf);
 };
+
+
+
+class NaiveSvf {
+ public:
+  NaiveSvf() { }
+  ~NaiveSvf() { }
+  
+  void Init() {
+    set_f_q<FREQUENCY_DIRTY>(0.01f, 100.0f);
+    Reset();
+  }
+  
+  void Reset() {
+    lp_ = bp_ = 0.0f;
+  }
+  
+  // Set frequency and resonance from true units. Various approximations
+  // are available to avoid the cost of tanf.
+  template<FrequencyApproximation approximation>
+  inline void set_f_q(float f, float resonance) {
+    f = f < 0.497f ? f : 0.497f;
+    if (approximation == FREQUENCY_EXACT) {
+      f_ = 2.0f * sinf(M_PI * f);
+    } else {
+      f_ = 2.0f * M_PI * f;
+    }
+    damp_ = 1.0f / resonance;
+  }
+  
+  template<FilterMode mode>
+  inline float Process(float in) {
+    float hp, notch, bp_normalized;
+    
+    bp_normalized = bp_ * damp_;
+    notch = in - bp_normalized;
+    lp_ += f_ * bp_;
+    hp = notch - lp_;
+    bp_ += f_ * hp;
+    
+    if (mode == FILTER_MODE_LOW_PASS) {
+      return lp_;
+    } else if (mode == FILTER_MODE_BAND_PASS) {
+      return bp_;
+    } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+      return bp_normalized;
+    } else if (mode == FILTER_MODE_HIGH_PASS) {
+      return hp;
+    }
+  }
+  
+ private:
+  float f_;
+  float damp_;
+  float lp_;
+  float bp_;
+  
+  DISALLOW_COPY_AND_ASSIGN(NaiveSvf);
+};
+
 
 }  // namespace stmlib
 

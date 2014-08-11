@@ -206,6 +206,74 @@ class Svf {
     }
   }
   
+  template<FilterMode mode>
+  inline void Process(const float* in, float* out, size_t size) {
+    float hp, bp, lp;
+    float state_1 = state_1_;
+    float state_2 = state_2_;
+    
+    while (size--) {
+      hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+      bp = g_ * hp + state_1;
+      state_1 = g_ * hp + bp;
+      lp = g_ * bp + state_2;
+      state_2 = g_ * bp + lp;
+    
+      float value;
+      if (mode == FILTER_MODE_LOW_PASS) {
+        value = lp;
+      } else if (mode == FILTER_MODE_BAND_PASS) {
+        value = bp;
+      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        value = bp * r_;
+      } else if (mode == FILTER_MODE_HIGH_PASS) {
+        value = hp;
+      }
+      
+      *out = value;
+      ++out;
+      ++in;
+    }
+    state_1_ = state_1;
+    state_2_ = state_2;
+  }
+  
+  template<FilterMode mode>
+  inline void Process(
+      const float* in, float* out_1, float* out_2, size_t size,
+      float gain_1, float gain_2) {
+    float hp, bp, lp;
+    float state_1 = state_1_;
+    float state_2 = state_2_;
+    
+    while (size--) {
+      hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+      bp = g_ * hp + state_1;
+      state_1 = g_ * hp + bp;
+      lp = g_ * bp + state_2;
+      state_2 = g_ * bp + lp;
+    
+      float value;
+      if (mode == FILTER_MODE_LOW_PASS) {
+        value = lp;
+      } else if (mode == FILTER_MODE_BAND_PASS) {
+        value = bp;
+      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        value = bp * r_;
+      } else if (mode == FILTER_MODE_HIGH_PASS) {
+        value = hp;
+      }
+      
+      *out_1 += value * gain_1;
+      *out_2 += value * gain_2;
+      ++out_1;
+      ++out_2;
+      ++in;
+    }
+    state_1_ = state_1;
+    state_2_ = state_2;
+  }
+  
   inline float g() const { return g_; }
   inline float r() const { return r_; }
   inline float h() const { return h_; }

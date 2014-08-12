@@ -45,13 +45,17 @@ inline float Interpolate(const float* table, float index, float size) {
   return a + (b - a) * index_fractional;
 }
 
+inline float SoftLimit(float x) {
+  return x * (27.0f + x * x) / (27.0f + 9.0f * x * x);
+}
+
 inline float SoftClip(float x) {
   if (x < -3.0f) {
     return -1.0f;
   } else if (x > 3.0f) {
     return 1.0f;
   } else {
-    return x * (27.0f + x * x) / (27.0f + 9.0f * x * x);
+    return SoftLimit(x);
   }
 }
 
@@ -72,6 +76,10 @@ inline float SoftClip(float x) {
     return result;
   }
 #endif
+
+inline int16_t SoftConvert(float x) {
+  return Clip16(static_cast<int32_t>(SoftLimit(x * 0.5f) * 32768.0f));
+}
 
 }  // namespace stmlib
 

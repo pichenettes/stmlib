@@ -24,10 +24,10 @@
 //
 // -----------------------------------------------------------------------------
 //
-// Delay line.
+// Group of delay lines sharing the same storage area;
 
-#ifndef STMLIB_DSP_DELAY_LINE_H_
-#define STMLIB_DSP_DELAY_LINE_H_
+#ifndef STMLIB_DSP_DELAY_POOL_H_
+#define STMLIB_DSP_DELAY_POOL_H_
 
 #include "stmlib/stmlib.h"
 
@@ -35,39 +35,44 @@
 
 namespace stmlib {
 
-template<typename T, size_t max_delay>
-class DelayLine {
+template<typename T, size_t size, size_t num_delays>
+class DelayPool {
  public:
-  DelayLine() { }
-  ~DelayLine() { }
+  DelayPool() { }
+  ~DelayPool() { }
   
-  void Init() {
-    std::fill(&line_[0], &line_[max_delay], T(0));
-    delay_ = 1;
+  void Init(const size_t* partition) {
+    std::fill(&line_[0], &line_[size], T(0));
+    start_[0] = 0;
+    for (size_t i = 1; i < num_delays; ++i) {
+      start_[i] = start_[i - 1] + partition[i - 1];
+    }
     write_ptr_ = 0;
   }
-  
-  inline void set_delay(size_t delay) {
-    delay_ = delay;
-  }
-
-  inline void Write(const T& sample) {
-    line_[write_ptr_] = sample;
-    write_ptr_ = (write_ptr_ + 1) % max_delay;
+ 
+  inline void NextSample() {
+    --write_ptr_;
+    if (write_ptr_ < 0) {
+      write_ptr_ += size;
+    }
   }
   
-  inline const T& Read() const {
-    return line_[(write_ptr_ - delay_ + max_delay) % max_delay];
+  inline void Write(int32_t index, const T& sample) {
+    line_[(write_ptr_ + start_[index]) % size] = sample;
+  }
+  
+  inline const T& Read(size_t index, size_t delay) const {
+    return line_[(write_ptr_ + start_[index] + delay) % size];
   }
   
  private:
-  size_t write_ptr_;
-  size_t delay_;
-  T line_[max_delay];
+  int32_t write_ptr_;
+  int32_t start_[num_delays];
+  T line_[size];
   
-  DISALLOW_COPY_AND_ASSIGN(DelayLine);
+  DISALLOW_COPY_AND_ASSIGN(DelayPool);
 };
 
 }  // namespace stmlib
 
-#endif  // STMLIB_DSP_DELAY_LINE_H_
+#endif  // STMLIB_DSP_DELAY_POOL_H_

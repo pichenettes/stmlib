@@ -41,10 +41,13 @@ enum CosineOscillatorMode {
   COSINE_OSCILLATOR_EXACT
 };
 
-template<CosineOscillatorMode mode>
 class CosineOscillator {
  public:
-  CosineOscillator(float frequency) {
+  CosineOscillator() { }
+  ~CosineOscillator() { }
+
+  template<CosineOscillatorMode mode>
+  void Init(float frequency) {
     if (mode == COSINE_OSCILLATOR_APPROXIMATE) {
       if (frequency > 0.75f) {
         frequency -= 0.75f;
@@ -60,12 +63,16 @@ class CosineOscillator {
       iir_coefficient_ = 2.0f * cosf(2.0f * M_PI * frequency);
     }
     initial_amplitude_ = iir_coefficient_ * 0.25f;
-  };
-  ~CosineOscillator() { }
+    Start();
+  }
 
   inline void Start() {
     y1_ = initial_amplitude_;
     y0_ = 0.5f;
+  }
+  
+  inline float value() const {
+    return y1_ + 0.5f;
   }
 
   inline float Next() {

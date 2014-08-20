@@ -29,14 +29,16 @@
 #ifndef STMLIB_SYSTEM_UID_H_
 #define STMLIB_SYSTEM_UID_H_
 
-#include <stm32f10x_conf.h>
-
 #include "stmlib/stmlib.h"
 
 namespace stmlib {
 
 uint32_t GetUniqueId(uint8_t word) {
+#ifdef STM32F4XX
+  uint32_t* base_address = (uint32_t*)(0x1fff7a10);
+#else
   uint32_t* base_address = (uint32_t*)(0x1ffff7e8);
+#endif 
   return base_address[word];
 }
 

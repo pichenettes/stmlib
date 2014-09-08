@@ -239,6 +239,35 @@ class Svf {
     state_2_ = state_2;
   }
   
+  inline void ProcessMultimode(
+      const float* in,
+      float* out,
+      size_t size,
+      float mode) {
+    float hp, bp, lp;
+    float state_1 = state_1_;
+    float state_2 = state_2_;
+    
+    mode *= mode;
+    
+    float hp_gain = mode < 0.5f ? mode * 2.0f : 2.0f - mode * 2.0f;
+    float lp_gain = mode < 0.5f ? 1.0f - mode * 2.0f : 0.0f;
+    float bp_gain = mode < 0.5f ? 0.0f : mode * 2.0f - 1.0f;
+    
+    while (size--) {
+      hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
+      bp = g_ * hp + state_1;
+      state_1 = g_ * hp + bp;
+      lp = g_ * bp + state_2;
+      state_2 = g_ * bp + lp;
+      *out = hp_gain * hp + bp_gain * bp + lp_gain * lp;
+      ++out;
+      ++in;
+    }
+    state_1_ = state_1;
+    state_2_ = state_2;
+  }
+  
   template<FilterMode mode>
   inline void Process(
       const float* in, float* out_1, float* out_2, size_t size,

@@ -243,7 +243,8 @@ class Svf {
       const float* in,
       float* out,
       size_t size,
-      float mode) {
+      float mode,
+      size_t decimate) {
     float hp, bp, lp;
     float state_1 = state_1_;
     float state_2 = state_2_;
@@ -254,14 +255,18 @@ class Svf {
     float lp_gain = mode < 0.5f ? 1.0f - mode * 2.0f : 0.0f;
     float bp_gain = mode < 0.5f ? 0.0f : mode * 2.0f - 1.0f;
     
+    size_t n = decimate - 1;
     while (size--) {
       hp = (*in - r_ * state_1 - g_ * state_1 - state_2) * h_;
       bp = g_ * hp + state_1;
       state_1 = g_ * hp + bp;
       lp = g_ * bp + state_2;
       state_2 = g_ * bp + lp;
-      *out = hp_gain * hp + bp_gain * bp + lp_gain * lp;
-      ++out;
+      ++n;
+      if (n == decimate) {
+        *out++ = hp_gain * hp + bp_gain * bp + lp_gain * lp;
+        n = 0;
+      }
       ++in;
     }
     state_1_ = state_1;
@@ -351,7 +356,6 @@ class NaiveSvf {
   template<FilterMode mode>
   inline float Process(float in) {
     float hp, notch, bp_normalized;
-    
     bp_normalized = bp_ * damp_;
     notch = in - bp_normalized;
     lp_ += f_ * bp_;

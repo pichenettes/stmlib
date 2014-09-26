@@ -45,6 +45,16 @@ inline float Interpolate(const float* table, float index, float size) {
   return a + (b - a) * index_fractional;
 }
 
+inline float InterpolateWrap(const float* table, float index, float size) {
+  index -= static_cast<float>(static_cast<int32_t>(index));
+  index *= size;
+  MAKE_INTEGRAL_FRACTIONAL(index)
+  float a = table[index_integral];
+  float b = table[index_integral + 1];
+  return a + (b - a) * index_fractional;
+}
+
+
 inline float SoftLimit(float x) {
   return x * (27.0f + x * x) / (27.0f + 9.0f * x * x);
 }

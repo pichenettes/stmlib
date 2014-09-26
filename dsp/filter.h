@@ -336,7 +336,7 @@ class NaiveSvf {
   }
   
   // Set frequency and resonance from true units. Various approximations
-  // are available to avoid the cost of tanf.
+  // are available to avoid the cost of sinf.
   template<FrequencyApproximation approximation>
   inline void set_f_q(float f, float resonance) {
     f = f < 0.497f ? f : 0.497f;

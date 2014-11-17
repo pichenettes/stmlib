@@ -321,6 +321,7 @@ class Svf {
 
 
 
+// Naive Chamberlin SVF.
 class NaiveSvf {
  public:
   NaiveSvf() { }
@@ -408,6 +409,159 @@ class NaiveSvf {
   DISALLOW_COPY_AND_ASSIGN(NaiveSvf);
 };
 
+
+
+// Modified Chamberlin SVF (Duane K. Wise) 
+// http://www.dafx.ca/proceedings/papers/p_053.pdf
+class ModifiedSvf {
+ public:
+  ModifiedSvf() { }
+  ~ModifiedSvf() { }
+  
+  void Init() {
+    Reset();
+  }
+  
+  void Reset() {
+    lp_ = bp_ = 0.0f;
+  }
+  
+  inline void set_f_fq(float f, float fq) {
+    f_ = f;
+    fq_ = fq;
+    x_ = 0.0f;
+  }
+  
+  template<FilterMode mode>
+  inline void Process(const float* in, float* out, size_t size) {
+    float lp = lp_;
+    float bp = bp_;
+    float x = x_;
+    const float fq = fq_;
+    const float f = f_;
+    while (size--) {
+      lp += f * bp;
+      bp += -fq * bp -f * lp + *in;
+      if (mode == FILTER_MODE_BAND_PASS ||
+          mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        bp += x;
+      }
+      x = *in++;
+      
+      if (mode == FILTER_MODE_LOW_PASS) {
+        *out++ = lp * f;
+      } else if (mode == FILTER_MODE_BAND_PASS) {
+        *out++ = bp * f;
+      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        *out++ = bp * fq;
+      } else if (mode == FILTER_MODE_HIGH_PASS) {
+        *out++ = x - lp * f - bp * fq;
+      }
+    }
+    lp_ = lp;
+    bp_ = bp;
+    x_ = x;
+  }
+  
+ private:
+  float f_;
+  float fq_;
+  float x_;
+  float lp_;
+  float bp_;
+  
+  DISALLOW_COPY_AND_ASSIGN(ModifiedSvf);
+};
+
+
+
+// Two passes of modified Chamberlin SVF with the same coefficients -
+// to implement Linkwitz–Riley (Butterworth squared) crossover filters.
+class CrossoverSvf {
+ public:
+  CrossoverSvf() { }
+  ~CrossoverSvf() { }
+  
+  void Init() {
+    Reset();
+  }
+  
+  void Reset() {
+    lp_[0] = bp_[0] = lp_[1] = bp_[1] = 0.0f;
+    x_[0] = 0.0f;
+    x_[1] = 0.0f;
+  }
+  
+  inline void set_f_fq(float f, float fq) {
+    f_ = f;
+    fq_ = fq;
+  }
+  
+  template<FilterMode mode>
+  inline void Process(const float* in, float* out, size_t size) {
+    float lp_1 = lp_[0];
+    float bp_1 = bp_[0];
+    float lp_2 = lp_[1];
+    float bp_2 = bp_[1];
+    float x_1 = x_[0];
+    float x_2 = x_[1];
+    const float fq = fq_;
+    const float f = f_;
+    while (size--) {
+      lp_1 += f * bp_1;
+      bp_1 += -fq * bp_1 -f * lp_1 + *in;
+      if (mode == FILTER_MODE_BAND_PASS ||
+          mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        bp_1 += x_1;
+      }
+      x_1 = *in++;
+      
+      float y;
+      if (mode == FILTER_MODE_LOW_PASS) {
+        y = lp_1 * f;
+      } else if (mode == FILTER_MODE_BAND_PASS) {
+        y = bp_1 * f;
+      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        y = bp_1 * fq;
+      } else if (mode == FILTER_MODE_HIGH_PASS) {
+        y = x_1 - lp_1 * f - bp_1 * fq;
+      }
+      
+      lp_2 += f * bp_2;
+      bp_2 += -fq * bp_2 -f * lp_2 + y;
+      if (mode == FILTER_MODE_BAND_PASS ||
+          mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        bp_2 += x_2;
+      }
+      x_2 = y;
+      
+      if (mode == FILTER_MODE_LOW_PASS) {
+        *out++ = lp_2 * f;
+      } else if (mode == FILTER_MODE_BAND_PASS) {
+        *out++ = bp_2 * f;
+      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        *out++ = bp_2 * fq;
+      } else if (mode == FILTER_MODE_HIGH_PASS) {
+        *out++ = x_2 - lp_2 * f - bp_2 * fq;
+      }
+    }
+    lp_[0] = lp_1;
+    bp_[0] = bp_1;
+    lp_[1] = lp_2;
+    bp_[1] = bp_2;
+    x_[0] = x_1;
+    x_[1] = x_2;
+  }
+  
+ private:
+  float f_;
+  float fq_;
+  float x_[2];
+  float lp_[2];
+  float bp_[2];
+  
+  DISALLOW_COPY_AND_ASSIGN(CrossoverSvf);
+};
 
 }  // namespace stmlib
 

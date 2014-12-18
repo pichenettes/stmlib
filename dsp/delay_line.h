@@ -30,6 +30,7 @@
 #define STMLIB_DSP_DELAY_LINE_H_
 
 #include "stmlib/stmlib.h"
+#include "stmlib/dsp/dsp.h"
 
 #include <algorithm>
 
@@ -51,15 +52,26 @@ class DelayLine {
     delay_ = delay;
   }
 
-  inline void Write(const T& sample) {
+  inline void Write(const T sample) {
     line_[write_ptr_] = sample;
-    write_ptr_ = (write_ptr_ + 1) % max_delay;
+    write_ptr_ = (write_ptr_ - 1 + max_delay) % max_delay;
   }
   
-  inline const T& Read() const {
-    return line_[(write_ptr_ - delay_ + max_delay) % max_delay];
+  inline const T Read() const {
+    return line_[(write_ptr_ + delay_) % max_delay];
   }
   
+  inline const T Read(size_t delay) const {
+    return line_[(write_ptr_ + delay) % max_delay];
+  }
+
+  inline const T Read(float delay) const {
+    MAKE_INTEGRAL_FRACTIONAL(delay)
+    const T a = line_[(write_ptr_ + delay_integral) % max_delay];
+    const T b = line_[(write_ptr_ + delay_integral + 1) % max_delay];
+    return a + (b - a) * delay_fractional;
+  }
+
  private:
   size_t write_ptr_;
   size_t delay_;

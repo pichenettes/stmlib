@@ -33,7 +33,6 @@
 #include "stmlib/stmlib.h"
 
 #include <cmath>
-#include <cstdio>
 
 namespace stmlib {
 

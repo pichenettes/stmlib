@@ -21,21 +21,21 @@ SECTIONS
 {
   .isr_vector :
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     KEEP(*(.isr_vector))            /* Startup code */
-    . = ALIGN(4);
+    . = ALIGN(16);
   } >FLASH
 
   .flashtext :
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     *(.flashtext)            /* Startup code */
-    . = ALIGN(4);
+    . = ALIGN(16);
   } >FLASH
 
   .text :
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     *(.text)                   /* remaining code */
     *(.text.*)                 /* remaining code */
     *(.rodata)                 /* read-only data (constants) */
@@ -44,31 +44,31 @@ SECTIONS
     *(.glue_7t)
     KEEP (*(.init))
     KEEP (*(.fini))
-    . = ALIGN(4);
+    . = ALIGN(16);
      _etext = .;
      _sidata = _etext;
   } >FLASH
   
   .data : AT ( _sidata )
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     _sdata = . ;
     *(.ramtext*)
-    . = ALIGN(4);
+    . = ALIGN(16);
     *(.data*)
     *(.data.*)
-    . = ALIGN(4);
+    . = ALIGN(16);
      _edata = . ;
   } >RAM
 
   .bss :
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     _sbss = .;
     *(.bss)
     *(.bss*)
     *(COMMON)
-    . = ALIGN(4);
+    . = ALIGN(16);
    _ebss = . ;
   } >RAM
   
@@ -77,21 +77,21 @@ SECTIONS
   
   ._user_heap_stack :
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
-    . = ALIGN(4);
+    . = ALIGN(16);
   } >RAM
   
   /* CCM section, vars must be located here explicitly */
   /* Example: int foo __attribute__ ((section (".ccmdata"))); */
   .ccmdata (NOLOAD) :
   {
-    . = ALIGN(4);
+    . = ALIGN(16);
     *(.ccmdata)
-    . = ALIGN(4);
+    . = ALIGN(16);
   } >CCMRAM
  
   DISCARD :

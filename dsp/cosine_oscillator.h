@@ -47,7 +47,7 @@ class CosineOscillator {
   ~CosineOscillator() { }
 
   template<CosineOscillatorMode mode>
-  void Init(float frequency) {
+  inline void Init(float frequency) {
     if (mode == COSINE_OSCILLATOR_APPROXIMATE) {
       InitApproximate(frequency);
     } else {
@@ -57,17 +57,19 @@ class CosineOscillator {
     Start();
   }
   
-  void InitApproximate(float frequency) {
-    if (frequency > 0.75f) {
-      frequency -= 0.75f;
-      iir_coefficient_ = 16.0f * frequency * (1.0f - 2.0f * frequency);
-    } else if (frequency < 0.25f) {
-      frequency = 0.25f - frequency;
-      iir_coefficient_ = 16.0f * frequency * (1.0f - 2.0f * frequency);
+  inline void InitApproximate(float frequency) {
+    float sign = 16.0f;
+    frequency -= 0.25f;
+    if (frequency < 0.0f) {
+      frequency = -frequency;
     } else {
-      frequency = frequency - 0.25f;
-      iir_coefficient_ = -16.0f * frequency * (1.0f - 2.0f * frequency);
+      if (frequency > 0.5f) {
+        frequency -= 0.5f;
+      } else {
+        sign = -16.0f;
+      }
     }
+    iir_coefficient_ = sign * frequency * (1.0f - 2.0f * frequency);
     initial_amplitude_ = iir_coefficient_ * 0.25f;
   }
   

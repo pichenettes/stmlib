@@ -54,6 +54,15 @@ inline float InterpolateWrap(const float* table, float index, float size) {
   return a + (b - a) * index_fractional;
 }
 
+#define ONE_POLE(out, in, coefficient) out += (coefficient) * ((in) - out);
+#define SLOPE(out, in, positive, negative) { \
+  float error = (in) - out; \
+  out += (error > 0 ? positive : negative) * error; \
+}
+
+inline float Crossfade(float a, float b, float fade) {
+  return a + (b - a) * fade;
+}
 
 inline float SoftLimit(float x) {
   return x * (27.0f + x * x) / (27.0f + 9.0f * x * x);

@@ -152,8 +152,13 @@
 
 /************************* PLL Parameters *************************************/
 /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
-#define PLL_M      (F_CRYSTAL / 1000000)
-#define PLL_N      (F_CPU / 500000)
+#ifdef SYSCLK_FREQ_EXT_HSE_PLL
+  #define PLL_M      6
+  #define PLL_N      (F_CPU * 12LL / F_CRYSTAL)
+#else
+  #define PLL_M      (F_CRYSTAL / 1000000)
+  #define PLL_N      (F_CPU / 500000)
+#endif
 
 /* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_P      2
@@ -352,6 +357,9 @@ static void SetSysClock(void)
 /******************************************************************************/
   __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
   
+#ifdef SYSCLK_FREQ_EXT_HSE_PLL
+  RCC->CR |= ((uint32_t)RCC_CR_HSEBYP);
+#endif  
   /* Enable HSE */
   RCC->CR |= ((uint32_t)RCC_CR_HSEON);
  

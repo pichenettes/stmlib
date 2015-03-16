@@ -400,6 +400,32 @@ class NaiveSvf {
       return hp;
     }
   }
+  
+  template<FilterMode mode>
+  inline void Process(const float* in, float* out, size_t size) {
+    float hp, notch, bp_normalized;
+    float lp = lp_;
+    float bp = bp_;
+    while (size--) {
+      bp_normalized = bp * damp_;
+      notch = *in++ - bp_normalized;
+      lp += f_ * bp;
+      hp = notch - lp;
+      bp += f_ * hp;
+      
+      if (mode == FILTER_MODE_LOW_PASS) {
+        *out++ = lp;
+      } else if (mode == FILTER_MODE_BAND_PASS) {
+        *out++ = bp;
+      } else if (mode == FILTER_MODE_BAND_PASS_NORMALIZED) {
+        *out++ = bp_normalized;
+      } else if (mode == FILTER_MODE_HIGH_PASS) {
+        *out++ = hp;
+      }
+    }
+    lp_ = lp;
+    bp_ = bp;
+  }
 
   template<FilterMode mode>
   inline void Process(const float* in, float* out, size_t size, size_t decimate) {

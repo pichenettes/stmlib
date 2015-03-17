@@ -31,6 +31,8 @@
 
 #include "stmlib/stmlib.h"
 
+#include <cmath>
+
 namespace stmlib {
 
 #define MAKE_INTEGRAL_FRACTIONAL(x) \

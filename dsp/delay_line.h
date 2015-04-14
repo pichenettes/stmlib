@@ -57,6 +57,13 @@ class DelayLine {
     write_ptr_ = (write_ptr_ - 1 + max_delay) % max_delay;
   }
   
+  inline const T Allpass(const T sample, size_t delay, const T coefficient) {
+    float read = line_[(write_ptr_ + delay) % max_delay];
+    float write = sample + coefficient * read;
+    Write(write);
+    return -write * coefficient + read;
+  }
+  
   inline const T Read() const {
     return line_[(write_ptr_ + delay_) % max_delay];
   }
@@ -83,3 +90,7 @@ class DelayLine {
 }  // namespace stmlib
 
 #endif  // STMLIB_DSP_DELAY_LINE_H_
+
+
+
+

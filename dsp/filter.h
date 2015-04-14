@@ -58,6 +58,36 @@ enum FrequencyApproximation {
 #define M_PI_POW_9 M_PI_POW_7 * M_PI_POW_2
 #define M_PI_POW_11 M_PI_POW_9 * M_PI_POW_2
 
+class DCBlocker {
+ public:
+  DCBlocker() { }
+  ~DCBlocker() { }
+  
+  void Init(float pole) {
+    x_ = 0.0f;
+    y_ = 0.0f;
+    pole_ = pole;
+  }
+  
+  inline void Process(float* in_out, size_t size) {
+    float x = x_;
+    float y = y_;
+    const float pole = pole_;
+    while (size--) {
+      float old_x = x;
+      x = *in_out;
+      *in_out++ = y = y * pole + x - old_x;
+    }
+    x_ = x;
+    y_ = y;
+  }
+  
+ private:
+  float pole_;
+  float x_;
+  float y_;
+};
+
 class OnePole {
  public:
   OnePole() { }

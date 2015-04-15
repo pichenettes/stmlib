@@ -78,6 +78,24 @@ class DelayLine {
     const T b = line_[(write_ptr_ + delay_integral + 1) % max_delay];
     return a + (b - a) * delay_fractional;
   }
+  
+  inline const T ReadHermite(float delay) const {
+    MAKE_INTEGRAL_FRACTIONAL(delay)
+    int32_t t = (write_ptr_ + delay_integral + max_delay);
+    const T xm1 = line_[(t - 1) % max_delay];
+    const T x0 = line_[(t) % max_delay];
+    const T x1 = line_[(t + 1) % max_delay];
+    const T x2 = line_[(t + 2) % max_delay];
+    const float c = (x1 - xm1) * 0.5f;
+    const float v = x0 - x1;
+    const float w = c + v;
+    const float a = w + v + (x2 - x0) * 0.5f;
+    const float b_neg = w + a;
+    const float f = delay_fractional;
+    return (((a * f) - b_neg) * f + c) * f + x0;
+    
+  }
+  
 
  private:
   size_t write_ptr_;

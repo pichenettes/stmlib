@@ -63,6 +63,11 @@ class DelayLine {
     Write(write);
     return -write * coefficient + read;
   }
+
+  inline const T WriteRead(const T sample, float delay) {
+    Write(sample);
+    return Read(delay);
+  }
   
   inline const T Read() const {
     return line_[(write_ptr_ + delay_) % max_delay];

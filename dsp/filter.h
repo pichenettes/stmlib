@@ -431,6 +431,9 @@ class NaiveSvf {
     }
   }
   
+  inline float lp() const { return lp_; }
+  inline float bp() const { return bp_; }
+  
   template<FilterMode mode>
   inline void Process(const float* in, float* out, size_t size) {
     float hp, notch, bp_normalized;

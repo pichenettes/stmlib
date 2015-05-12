@@ -459,6 +459,23 @@ class NaiveSvf {
     lp_ = lp;
     bp_ = bp;
   }
+  
+  inline void Split(const float* in, float* low, float* high, size_t size) {
+    float hp, notch, bp_normalized;
+    float lp = lp_;
+    float bp = bp_;
+    while (size--) {
+      bp_normalized = bp * damp_;
+      notch = *in++ - bp_normalized;
+      lp += f_ * bp;
+      hp = notch - lp;
+      bp += f_ * hp;
+      *low++ = lp;
+      *high++ = hp;
+    }
+    lp_ = lp;
+    bp_ = bp;
+  }
 
   template<FilterMode mode>
   inline void Process(const float* in, float* out, size_t size, size_t decimate) {

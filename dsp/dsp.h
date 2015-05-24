@@ -61,6 +61,16 @@ inline float InterpolateWrap(const float* table, float index, float size) {
   float error = (in) - out; \
   out += (error > 0 ? positive : negative) * error; \
 }
+#define SLEW(out, in, delta) { \
+  float error = (in) - out; \
+  float d = (delta); \
+  if (error > d) { \
+    error = d; \
+  } else if (error < -d) { \
+    error = -d; \
+  } \
+  out += error; \
+}
 
 inline float Crossfade(float a, float b, float fade) {
   return a + (b - a) * fade;

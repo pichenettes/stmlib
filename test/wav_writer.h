@@ -103,6 +103,26 @@ class WavWriter {
     remaining_frames_ -= size;
   }
   
+  void Write(float* l, float* r, size_t size, float gain=32767.0f) {
+    int16_t* short_buffer = (int16_t*)(calloc(size * 2, sizeof(int16_t)));
+    for (size_t i = 0; i < size; ++i) {
+      {
+        float x = l[i] * gain;
+        if (x >= 32767.0f) x = 32767.0f;
+        if (x <= -32767.0f) x = -32767.0f;
+        short_buffer[i * 2] = static_cast<int16_t>(x);
+      }
+      {
+        float x = r[i] * gain;
+        if (x >= 32767.0f) x = 32767.0f;
+        if (x <= -32767.0f) x = -32767.0f;
+        short_buffer[i * 2 + 1] = static_cast<int16_t>(x);
+      }
+    }
+    fwrite(short_buffer, sizeof(int16_t), size * 2, fp_);
+    remaining_frames_ -= size;
+  }
+  
   size_t remaining_frames() { return remaining_frames_; }
   float progress() {
     return float(remaining_frames_) / float(sample_rate_ * duration_);

@@ -419,7 +419,7 @@ image_jtag_1M:
 debug_server: $(TARGET_BIN)
 	openocd \
 		-f $(OPENOCD_SCRIPTS_PATH)interface_$(PGM_INTERFACE).cfg \
-		-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY)_$(PGM_INTERFACE_TYPE)_$(PGM_INTERFACE_TYPE).cfg \
+		-f $(OPENOCD_SCRIPTS_PATH)stm32$(FAMILY)_$(PGM_INTERFACE_TYPE).cfg \
 		-c "init" \
 		-c "reset" \
 		-c "halt"

@@ -27,17 +27,20 @@
 # ------------------------------------------------------------------------------
 
 TOOLCHAIN_PATH ?= /usr/local/arm/
-TOOLCHAIN_BIN  = $(TOOLCHAIN_PATH)bin/
-STM32_PATH     = stmlib/third_party/STM
 
 # Supported: arm-usb-ocd, arm-usb-ocd-h, arm-usb-tiny-h, stlink-v2
-PGM_INTERFACE = arm-usb-ocd-h
+PGM_INTERFACE ?= arm-usb-ocd-h
 # hla for stlink-v2 ; jtag otherwise
-PGM_INTERFACE_TYPE = jtag
+PGM_INTERFACE_TYPE ?= jtag
 
-PGM_SERIAL_PORT = /dev/ftdi-usbserial
-PGM_SERIAL_BAUD_RATE = 115200
-PGM_SERIAL_VERIFY = -v
+PGM_SERIAL_PORT ?= /dev/ftdi-usbserial
+PGM_SERIAL_BAUD_RATE ?= 115200
+PGM_SERIAL_VERIFY ?= -v
+
+# --- You should not have to modify these --------------------------------------
+
+TOOLCHAIN_BIN  = $(TOOLCHAIN_PATH)bin/
+STM32_PATH     = stmlib/third_party/STM
 
 # --- Do not modify anything below this point ----------------------------------
 

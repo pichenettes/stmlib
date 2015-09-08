@@ -159,20 +159,7 @@ class MidiStreamParser {
         break;
 
       case 0xb0:
-        switch (data_[0]) {
-          case 0x78:
-            Handler::AllSoundOff(lo);
-            break;
-          case 0x79:
-            Handler::ResetAllControllers(lo);
-            break;
-          case 0x7b:
-            Handler::AllNotesOff(lo);
-            break;
-          default:
-            Handler::ControlChange(lo, data_[0], data_[1]);
-            break;
-        }
+        Handler::ControlChange(lo, data_[0], data_[1]);
         break;
 
       case 0xc0:

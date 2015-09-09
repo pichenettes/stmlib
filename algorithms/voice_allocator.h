@@ -101,14 +101,16 @@ class VoiceAllocator {
   }
 
   void Clear() {
-    ClearNotes();
+    memset(&pool_, 0, sizeof(pool_));
     for (uint8_t i = 0; i < capacity; ++i) {
       lru_[i] = capacity - i - 1;
     }
   }
 
   inline void ClearNotes() {
-    memset(&pool_, 0, sizeof(pool_));
+    for (uint8_t i = 0; i < capacity; ++i) {
+      pool_[i] &= 0x7f;
+    }
   }
 
   inline void set_size(uint8_t size) {

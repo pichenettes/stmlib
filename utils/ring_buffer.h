@@ -80,6 +80,14 @@ class RingBuffer {
     write_ptr_ = read_ptr_;
   }
   
+  inline void Swallow(size_t n) {
+    // Read enough samples to make it possible to read 1 sample.
+    if (writable() >= n) {
+      return;
+    }
+    read_ptr_ = (write_ptr_ + 1 + n) % size;
+  }
+  
   inline void ImmediateRead(T* destination, size_t num_elements) {
     size_t r = read_ptr_;
     size_t read = num_elements;

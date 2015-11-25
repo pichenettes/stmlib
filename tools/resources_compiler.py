@@ -37,8 +37,9 @@ import sys
 
 class ResourceEntry(object):
   
-  def __init__(self, index, key, value, dupe_of, table):
+  def __init__(self, index, key, value, dupe_of, table, in_ram):
     self._index = index
+    self._in_ram = in_ram
     self._key = key
     self._value = value
     self._dupe_of = self._key if dupe_of is None else dupe_of
@@ -52,7 +53,8 @@ class ResourceEntry(object):
   def declaration(self):
     c_type = self._table.c_type
     name = self.variable_name
-    return 'const %(c_type)s %(name)s[]' % locals()
+    storage = ' IN_RAM' if self._in_ram else ''
+    return 'const %(c_type)s %(name)s[]%(storage)s' % locals()
     
   def Declare(self, f):
     if self._dupe_of == self._key:
@@ -125,13 +127,15 @@ class ResourceTable(object):
         key, value = entry
 
       # Add a prefix to avoid key duplicates.
+      in_ram = 'IN_RAM' in key
+      key = key.replace('IN_RAM', '')
       key = self._MakeIdentifier(key)
       while key in keys:
         key = '_%s' % key
       keys.add(key)
       hashable_value = tuple(value)
       self.entries.append(ResourceEntry(index, key, value,
-          values.get(hashable_value, None), self))
+          values.get(hashable_value, None), self, in_ram))
       if not hashable_value in values:
         values[hashable_value] = key
   

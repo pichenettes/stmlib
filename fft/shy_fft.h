@@ -216,9 +216,8 @@ struct DirectTransform {
   
  public:
   void operator()(
-      const T* input,
+      T* input,
       T* output,
-      T* workspace,
       const uint8_t* bit_rev,
       Phasor* phasor) {
     T* s;
@@ -247,7 +246,7 @@ struct DirectTransform {
     
     // Third pass.
     s = output;
-    d = workspace;
+    d = input;
     for (size_t i = 0; i < size; i += 8) {
       T v;
 
@@ -315,9 +314,8 @@ struct DirectTransform {
   
   // The exact same thing but with "num_passes" as a run-time argument.
   void operator()(
-      const T* input,
+      T* input,
       T* output,
-      T* workspace,
       const uint8_t* bit_rev,
       Phasor* phasor,
       size_t rt_num_passes) {
@@ -346,7 +344,7 @@ struct DirectTransform {
     
     // Third pass.
     s = output;
-    d = workspace;
+    d = input;
     for (size_t i = 0; i < rt_size; i += 8) {
       T v;
 
@@ -451,9 +449,8 @@ struct InverseTransform {
   
  public:
   void operator()(
-      const T* input,
+      T* input,
       T* output,
-      T* workspace,
       const uint8_t* bit_rev,
       Phasor* phasor) {
     T* s = (T*)(input);
@@ -497,9 +494,9 @@ struct InverseTransform {
       // Flip source and destination pointers for the next pass.
       if (d == output) {
         s = output;
-        d = workspace;
+        d = input;
       } else {
-        s = workspace;
+        s = input;
         d = output;
       }
     }
@@ -510,7 +507,7 @@ struct InverseTransform {
     }
     
     s = output;
-    d = workspace;
+    d = input;
     for (size_t i = 0; i < size; i += 8) {
       T vr, vi;
       d[i] = s[i] + s[i + 4];
@@ -526,7 +523,7 @@ struct InverseTransform {
     }
     
     // First and second pass.
-    s = workspace;
+    s = input;
     d = output;
     for (size_t i = 0; i < size; i += 4) {
       size_t r0 = num_passes <= 8
@@ -550,9 +547,8 @@ struct InverseTransform {
   }
   
   void operator()(
-      const T* input,
+      T* input,
       T* output,
-      T* workspace,
       const uint8_t* bit_rev,
       Phasor* phasor,
       size_t rt_num_passes) {
@@ -599,9 +595,9 @@ struct InverseTransform {
       // Flip source and destination pointers for the next pass.
       if (d == output) {
         s = output;
-        d = workspace;
+        d = input;
       } else {
-        s = workspace;
+        s = input;
         d = output;
       }
     }
@@ -612,7 +608,7 @@ struct InverseTransform {
     }
     
     s = output;
-    d = workspace;
+    d = input;
     for (size_t i = 0; i < rt_size; i += 8) {
       T vr, vi;
       d[i] = s[i] + s[i + 4];
@@ -628,7 +624,7 @@ struct InverseTransform {
     }
     
     // First and second pass.
-    s = workspace;
+    s = input;
     d = output;
     for (size_t i = 0; i < rt_size; i += 4) {
       size_t r0 = \
@@ -716,32 +712,11 @@ class ShyFFT {
     phasor_.Init();
   }
   
-  void Direct(const T* input, T* output, T* workspace) {
-    DirectTransform<T, num_passes, Phasor<T, num_passes> > d;
-    d(
-        input,
-        output,
-        workspace,
-        num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
-        &phasor_);
-  }
-  
   void Direct(T* input, T* output) {
     DirectTransform<T, num_passes, Phasor<T, num_passes> > d;
     d(
         input,
         output,
-        input,
-        num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
-        &phasor_);
-  }
-  
-  void Inverse(const T* input, T* output, T* workspace) {
-    InverseTransform<T, num_passes, Phasor<T, num_passes> > i;
-    i(
-        input,
-        output,
-        workspace,
         num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
         &phasor_);
   }
@@ -751,20 +726,8 @@ class ShyFFT {
     i(
         input,
         output,
-        input,
         num_passes <= 8 ? &bit_rev_[0] : bit_rev_256_lut_,
         &phasor_);
-  }
-  
-  void Direct(const T* input, T* output, T* workspace, size_t n) {
-    DirectTransform<T, num_passes, Phasor<T, num_passes> > d;
-    d(
-        input,
-        output,
-        workspace,
-        bit_rev_256_lut_,
-        &phasor_,
-        n);
   }
   
   void Direct(T* input, T* output, size_t n) {
@@ -772,18 +735,6 @@ class ShyFFT {
     d(
         input,
         output,
-        input,
-        bit_rev_256_lut_,
-        &phasor_,
-        n);
-  }
-  
-  void Inverse(const T* input, T* output, T* workspace, size_t n) {
-    InverseTransform<T, num_passes, Phasor<T, num_passes> > i;
-    i(
-        input,
-        output,
-        workspace,
         bit_rev_256_lut_,
         &phasor_,
         n);
@@ -794,7 +745,6 @@ class ShyFFT {
     i(
         input,
         output,
-        input,
         bit_rev_256_lut_,
         &phasor_,
         n);

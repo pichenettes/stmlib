@@ -73,7 +73,7 @@ VPATH          = $(PACKAGES)
 
 CC_FILES       = $(notdir $(wildcard $(patsubst %,%/*.cc,$(PACKAGES))))
 C_FILES        = $(notdir $(wildcard $(patsubst %,%/*.c,$(PACKAGES))))
-AS_FILES       = $(notdir $(wildcard $(patsubst %,%/*.as,$(PACKAGES))))
+AS_FILES       = $(notdir $(wildcard $(patsubst %,%/*.s,$(PACKAGES))))
 
 TARGET_BIN     = $(BUILD_DIR)$(TARGET).bin
 TARGET_ELF     = $(BUILD_DIR)$(TARGET).elf
@@ -91,7 +91,7 @@ DEP_FILE       = $(BUILD_DIR)depends.mk
 
 ifeq ($(FAMILY),f4xx)
 
-MODEL_DEFINE = STM32F4XX
+MODEL_DEFINE = STM32F40_41xxx -DSTM32F4XX -DARM_MATH_CM4 -D__FPU_PRESENT
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f4xx.o
 LINKER_SCRIPT = stmlib/linker_scripts/stm32f4xx_flash$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F4xx_StdPeriph_Driver
@@ -250,7 +250,7 @@ $(BUILD_DIR)%.sym: $(BUILD_DIR)%.elf
 # What to build
 # ------------------------------------------------------------------------------
 
-OBJ_FILES      = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.S=.o)
+OBJ_FILES      = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.s=.o)
 OBJS           = $(patsubst %,$(BUILD_DIR)%,$(OBJ_FILES)) $(STARTUP_OBJ)
 DEPS           = $(OBJS:.o=.d)
 

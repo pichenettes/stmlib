@@ -35,7 +35,14 @@ namespace stmlib {
 
 class BufferAllocator {
  public:
+  BufferAllocator() { }
+  ~BufferAllocator() { }
+  
   BufferAllocator(void* buffer, size_t size) {
+    Init(buffer, size);
+  }
+  
+  inline void Init(void* buffer, size_t size) {
     buffer_ = static_cast<uint8_t*>(buffer);
     size_ = size;
     Free();

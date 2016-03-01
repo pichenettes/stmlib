@@ -98,6 +98,15 @@ FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F4xx_StdPeriph_Driver
 ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork -funroll-loops
 ARCH_DEFINE = GCC_ARMCM4
 
+else ifeq ($(FAMILY),f37x)
+
+MODEL_DEFINE = STM32F37X -DARM_MATH_CM4 -D__FPU_PRESENT
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f37x.o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32f373x_flash$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F37x_StdPeriph_Driver
+ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork -funroll-loops
+ARCH_DEFINE = GCC_ARMCM4
+
 else
 
 ifeq ($(DENSITY),hd)
@@ -409,6 +418,11 @@ UPLOAD_JTAG_COMBO_ERASE_FIRST_CMD = $(BASE_JTAG_CMD) \
 image_jtag:
 	$(BASE_JTAG_CMD) \
 		-c "dump_image image.bin 0x08000000 131072" \
+		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+
+image_jtag_256k:
+	$(BASE_JTAG_CMD) \
+		-c "dump_image image.bin 0x08000000 262144" \
 		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 image_jtag_1M:

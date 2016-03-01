@@ -29,10 +29,18 @@
 #include "stmlib/system/bootloader_utils.h"
 
 #ifndef STM32F4XX
-  #include <stm32f10x_conf.h>
+
+#ifdef STM32F37X
+  #include <stm32f37x_conf.h>
 #else
+  #include <stm32f10x_conf.h>
+#endif  // STM32F37X
+
+#else
+
   #include <stm32f4xx_conf.h>
-#endif
+
+#endif  // STM32F4XX
 
 namespace stmlib {
 

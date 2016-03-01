@@ -44,10 +44,14 @@ class HysteresisQuantizer {
   }
 
   int Process(float value, int num_steps) {
+    return Process(value, num_steps, 0.25f);
+  }
+
+  int Process(float value, int num_steps, float hysteresis) {
     value *= static_cast<float>(num_steps - 1);
     float hysteresis_feedback = value > static_cast<float>(quantized_value_)
-        ? -0.1f
-        : 0.1f;
+        ? -hysteresis
+        : hysteresis;
     int q = static_cast<int>(value + hysteresis_feedback + 0.5f);
     CONSTRAIN(q, 0, num_steps - 1);
     quantized_value_ = q;

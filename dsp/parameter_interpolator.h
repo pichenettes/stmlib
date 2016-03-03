@@ -49,6 +49,10 @@ class ParameterInterpolator {
     value_ += increment_;
     return value_;
   }
+
+  inline float subsample(float t) {
+    return value_ + increment_ * t;
+  }
   
  private:
   float* state_;

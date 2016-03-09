@@ -4,7 +4,7 @@ Default linker script for STM32F37C? (256k flash, 32k RAM)
 
 ENTRY(Reset_Handler)
 
-_estack = 0x20020000;
+_estack = 0x20008000;
 
 _Min_Heap_Size = 0;
 _Min_Stack_Size = 0x400;

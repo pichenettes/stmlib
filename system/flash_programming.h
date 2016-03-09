@@ -29,7 +29,7 @@
 #ifndef STMLIB_SYSTEM_FLASH_PROGRAMMING_H_
 #define STMLIB_SYSTEM_FLASH_PROGRAMMING_H_
 
-#if define STM32F37X
+#if defined (STM32F37X)
 
   #define PAGE_SIZE (uint16_t)0x800
 

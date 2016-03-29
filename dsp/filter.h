@@ -238,6 +238,36 @@ class Svf {
     }
   }
   
+  template<FilterMode mode_1, FilterMode mode_2>
+  inline void Process(float in, float* out_1, float* out_2) {
+    float hp, bp, lp;
+    hp = (in - r_ * state_1_ - g_ * state_1_ - state_2_) * h_;
+    bp = g_ * hp + state_1_;
+    state_1_ = g_ * hp + bp;
+    lp = g_ * bp + state_2_;
+    state_2_ = g_ * bp + lp;
+    
+    if (mode_1 == FILTER_MODE_LOW_PASS) {
+      *out_1 = lp;
+    } else if (mode_1 == FILTER_MODE_BAND_PASS) {
+      *out_1 = bp;
+    } else if (mode_1 == FILTER_MODE_BAND_PASS_NORMALIZED) {
+      *out_1 = bp * r_;
+    } else if (mode_1 == FILTER_MODE_HIGH_PASS) {
+      *out_1 = hp;
+    }
+
+    if (mode_2 == FILTER_MODE_LOW_PASS) {
+      *out_2 = lp;
+    } else if (mode_2 == FILTER_MODE_BAND_PASS) {
+      *out_2 = bp;
+    } else if (mode_2 == FILTER_MODE_BAND_PASS_NORMALIZED) {
+      *out_2 = bp * r_;
+    } else if (mode_2 == FILTER_MODE_HIGH_PASS) {
+      *out_2 = hp;
+    }
+  }
+  
   template<FilterMode mode>
   inline void Process(const float* in, float* out, size_t size) {
     float hp, bp, lp;

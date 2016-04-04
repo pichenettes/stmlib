@@ -43,12 +43,17 @@ class HysteresisQuantizer {
     quantized_value_ = 0;
   }
 
-  int Process(float value, int num_steps) {
+  inline int Process(float value, int num_steps) {
     return Process(value, num_steps, 0.25f);
   }
 
-  int Process(float value, int num_steps, float hysteresis) {
+  inline int Process(float value, int num_steps, float hysteresis) {
+    return Process(0, value, num_steps, hysteresis);
+  }
+
+  inline int Process(int base, float value, int num_steps, float hysteresis) {
     value *= static_cast<float>(num_steps - 1);
+    value += static_cast<float>(base);
     float hysteresis_feedback = value > static_cast<float>(quantized_value_)
         ? -hysteresis
         : hysteresis;
@@ -57,7 +62,7 @@ class HysteresisQuantizer {
     quantized_value_ = q;
     return q;
   }
-  
+
   template<typename T>
   const T& Lookup(const T* array, float value, int num_steps) {
     return array[Process(value, num_steps)];

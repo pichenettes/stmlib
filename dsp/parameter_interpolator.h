@@ -35,14 +35,19 @@ namespace stmlib {
 
 class ParameterInterpolator {
  public:
+  ParameterInterpolator() { }
   ParameterInterpolator(float* state, float new_value, size_t size) {
-    state_ = state;
-    value_ = *state;
-    increment_ = (new_value - *state) / static_cast<float>(size);
+    Init(state, new_value, size);
   }
 
   ~ParameterInterpolator() {
     *state_ = value_;
+  }
+  
+  inline void Init(float* state, float new_value, size_t size) {
+    state_ = state;
+    value_ = *state;
+    increment_ = (new_value - *state) / static_cast<float>(size);
   }
   
   inline float Next() {

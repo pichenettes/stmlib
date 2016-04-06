@@ -37,7 +37,7 @@ class Random {
  public:
   static inline uint32_t state() { return rng_state_; }
 
-  static inline void Seed(uint16_t seed) {
+  static inline void Seed(uint32_t seed) {
     rng_state_ = seed;
   }
 

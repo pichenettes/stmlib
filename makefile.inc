@@ -402,14 +402,14 @@ UPLOAD_JTAG_COMBO_NO_ERASE_CMD = $(BASE_JTAG_CMD) \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 UPLOAD_JTAG_ERASE_FIRST_CMD = $(BASE_JTAG_CMD) \
-			-c "flash erase_address 0x08000000 16384" \
+			-c "flash erase_address 0x08000000 32768" \
 			-c "reset" \
 			-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
 			-c "verify_image $(TARGET_BIN)" \
 			-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
 
 UPLOAD_JTAG_COMBO_ERASE_FIRST_CMD = $(BASE_JTAG_CMD) \
-			-c "flash erase_address 0x08000000 16384" \
+			-c "flash erase_address 0x08000000 32768" \
 			-c "reset" \
 			-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
 			-c "verify_image $(COMBO_BIN)" \

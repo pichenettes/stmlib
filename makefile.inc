@@ -29,8 +29,8 @@
 TOOLCHAIN_PATH ?= /usr/local/arm/
 
 # PGM_INTERFACE ?= stlink-v2
-PGM_INTERFACE ?= ftdi/olimex-arm-usb-ocd-h
-# PGM_INTERFACE ?= ftdi/olimex-arm-jtag-swd
+# PGM_INTERFACE ?= ftdi/olimex-arm-usb-ocd-h
+PGM_INTERFACE ?= ftdi/olimex-arm-jtag-swd
 
 ifeq ($(PGM_INTERFACE),ftdi/olimex-arm-jtag-swd)
 OPENOCD_INTERFACE_SCRIPT ?= interface/ftdi/olimex-arm-usb-ocd-h.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg
@@ -346,7 +346,9 @@ $(COMBO_BIN): $(TARGET_HEX) $(BOOTLOADER_HEX)
 BASE_JTAG_CMD = openocd \
 			-f $(OPENOCD_INTERFACE_SCRIPT) \
 			-f $(OPENOCD_TARGET_SCRIPT) \
-			-f $(OPENOCD_SCRIPTS_PATH)prelude.cfg \
+			-c "init" -c "halt" -c "sleep 200"
+
+POSTLUDE = -c "sleep 200" -c "reset run" -c "shutdown"
 
 upload: $(UPLOAD_COMMAND)
 
@@ -387,17 +389,17 @@ upload_combo_serial_no_erase: $(COMBO_BIN)
 image_jtag:
 	$(BASE_JTAG_CMD) \
 		-c "dump_image image.bin 0x08000000 131072" \
-		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+		$(POSTLUDE)
 
 image_jtag_256k:
 	$(BASE_JTAG_CMD) \
 		-c "dump_image image.bin 0x08000000 262144" \
-		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+		$(POSTLUDE)
 
 image_jtag_1M:
 	$(BASE_JTAG_CMD) \
 		-c "dump_image image.bin 0x08000000 1048576" \
-		-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+		$(POSTLUDE)
 
 debug_server: $(TARGET_BIN)
 	openocd \
@@ -413,33 +415,33 @@ debug_client:
 erase_jtag:
 	$(BASE_JTAG_CMD) \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 upload_jtag: $(TARGET_BIN)
 	$(BASE_JTAG_CMD) \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 				-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
 				-c "verify_image $(TARGET_BIN)" \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 upload_combo_jtag: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 				-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
 				-c "verify_image $(COMBO_BIN)" \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 upload_jtag_no_erase: $(TARGET_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
 				-c "verify_image $(TARGET_BIN)" \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 upload_combo_jtag_no_erase: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
 				-c "verify_image $(COMBO_BIN)" \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 upload_jtag_erase_first: $(TARGET_BIN)
 	$(BASE_JTAG_CMD) \
@@ -447,7 +449,7 @@ upload_jtag_erase_first: $(TARGET_BIN)
 				-c "reset halt" \
 				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
 				-c "verify_image $(TARGET_BIN)" \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 upload_combo_jtag_erase_first: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
@@ -455,7 +457,7 @@ upload_combo_jtag_erase_first: $(COMBO_BIN)
 				-c "reset halt" \
 				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
 				-c "verify_image $(COMBO_BIN)" \
-				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
+				$(POSTLUDE)
 
 # Phony target for killing the system FTDI driver on OS X.
 kill_ftdi:

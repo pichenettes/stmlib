@@ -28,7 +28,15 @@
 
 TOOLCHAIN_PATH ?= /usr/local/arm/
 
-OPENOCD_INTERFACE_SCRIPT ?= interface/ftdi/olimex-arm-usb-ocd-h.cfg
+# PGM_INTERFACE ?= stlink-v2
+PGM_INTERFACE ?= ftdi/olimex-arm-usb-ocd-h
+# PGM_INTERFACE ?= olimex-arm-jtag-swd
+
+ifeq ($(FAMILY),olimex-arm-jtag-swd)
+OPENOCD_INTERFACE_SCRIPT ?= -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg
+else
+OPENOCD_INTERFACE_SCRIPT ?= interface/$(PGM_INTERFACE).cfg
+endif
 
 PGM_SERIAL_PORT ?= /dev/ftdi-usbserial
 PGM_SERIAL_BAUD_RATE ?= 115200
@@ -436,7 +444,7 @@ upload_combo_jtag_no_erase: $(COMBO_BIN)
 upload_jtag_erase_first: $(TARGET_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash erase_address 0x08000000 32768" \
-				-c "reset" \
+				-c "reset halt" \
 				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
 				-c "verify_image $(TARGET_BIN)" \
 				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg
@@ -444,7 +452,7 @@ upload_jtag_erase_first: $(TARGET_BIN)
 upload_combo_jtag_erase_first: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash erase_address 0x08000000 32768" \
-				-c "reset" \
+				-c "reset halt" \
 				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
 				-c "verify_image $(COMBO_BIN)" \
 				-f $(OPENOCD_SCRIPTS_PATH)postlude.cfg

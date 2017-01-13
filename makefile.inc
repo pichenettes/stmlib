@@ -30,10 +30,10 @@ TOOLCHAIN_PATH ?= /usr/local/arm/
 
 # PGM_INTERFACE ?= stlink-v2
 PGM_INTERFACE ?= ftdi/olimex-arm-usb-ocd-h
-# PGM_INTERFACE ?= olimex-arm-jtag-swd
+# PGM_INTERFACE ?= ftdi/olimex-arm-jtag-swd
 
-ifeq ($(FAMILY),olimex-arm-jtag-swd)
-OPENOCD_INTERFACE_SCRIPT ?= -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg
+ifeq ($(PGM_INTERFACE),ftdi/olimex-arm-jtag-swd)
+OPENOCD_INTERFACE_SCRIPT ?= interface/ftdi/olimex-arm-usb-ocd-h.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg
 else
 OPENOCD_INTERFACE_SCRIPT ?= interface/$(PGM_INTERFACE).cfg
 endif

@@ -113,6 +113,16 @@ ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-i
 ARCH_DEFINE = GCC_ARMCM4
 OPENOCD_TARGET = f3x
 
+else ifeq ($(FAMILY),f0xx)
+
+MODEL_DEFINE = STM32F0XX
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f0xx.o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32f0xx_flash$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F0xx_StdPeriph_Driver
+ARCHFLAGS = -mcpu=cortex-m0 -mthumb -mthumb-interwork -funroll-loops
+ARCH_DEFINE = GCC_ARMCM0
+OPENOCD_TARGET = f0x
+
 else
 
 ifeq ($(DENSITY),hd)

@@ -44,10 +44,18 @@
 #define STMLIB_SYSTEM_PAGE_STORAGE_H_
 
 #ifdef STM32F37X
+
   #include <stm32f37x_conf.h>
+
 #else
-  #include <stm32f10x_conf.h>
-#endif
+
+  #ifdef STM32F0XX
+    #include <stm32f0xx_conf.h>
+  #else
+    #include <stm32f10x_conf.h>
+  #endif  // STM32F0XX
+
+#endif  // STM32F37X
 
 #include <cstring>
 

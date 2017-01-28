@@ -35,7 +35,7 @@
 
 #else
 
-  #if defined (STM32F10X_LD) || defined (STM32F10X_MD)
+  #if defined (STM32F10X_LD) || defined (STM32F10X_MD) || defined (STM32F0XX)
     #define PAGE_SIZE  (uint16_t)0x400  /* Page size = 1KByte */
   #elif defined (STM32F10X_HD) || defined (STM32F10X_CL)
     #define PAGE_SIZE  (uint16_t)0x800  /* Page size = 2KByte */

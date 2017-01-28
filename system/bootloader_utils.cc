@@ -30,16 +30,18 @@
 
 #ifndef STM32F4XX
 
-#ifdef STM32F37X
-  #include <stm32f37x_conf.h>
-#else
-  #include <stm32f10x_conf.h>
-#endif  // STM32F37X
+#ifdef STM32F0XX
+  #include <stm32f0xx_conf.h>
+#else 
+  #ifdef STM32F37X
+    #include <stm32f37x_conf.h>
+  #else
+    #include <stm32f10x_conf.h>
+  #endif  // STM32F37X
+#endif  // STM32F0XX
 
 #else
-
   #include <stm32f4xx_conf.h>
-
 #endif  // STM32F4XX
 
 namespace stmlib {

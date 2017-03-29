@@ -28,9 +28,9 @@
 
 TOOLCHAIN_PATH ?= /usr/local/arm/
 
-# PGM_INTERFACE ?= stlink-v2
-PGM_INTERFACE ?= ftdi/olimex-arm-usb-ocd-h
+PGM_INTERFACE ?= stlink-v2
 # PGM_INTERFACE ?= ftdi/olimex-arm-jtag-swd
+# PGM_INTERFACE ?= ftdi/olimex-arm-usb-ocd-h
 
 ifeq ($(PGM_INTERFACE),ftdi/olimex-arm-jtag-swd)
 OPENOCD_INTERFACE_SCRIPT ?= interface/ftdi/olimex-arm-usb-ocd-h.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg
@@ -424,6 +424,7 @@ debug_client:
 
 erase_jtag:
 	$(BASE_JTAG_CMD) \
+        -c "stm32f4x unlock 0" \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 				$(POSTLUDE)
 

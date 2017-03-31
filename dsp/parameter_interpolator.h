@@ -40,6 +40,12 @@ class ParameterInterpolator {
     Init(state, new_value, size);
   }
 
+  ParameterInterpolator(float* state, float new_value, float step) {
+    state_ = state;
+    value_ = *state;
+    increment_ = (new_value - *state) * step;
+  }
+
   ~ParameterInterpolator() {
     *state_ = value_;
   }
@@ -49,7 +55,7 @@ class ParameterInterpolator {
     value_ = *state;
     increment_ = (new_value - *state) / static_cast<float>(size);
   }
-  
+
   inline float Next() {
     value_ += increment_;
     return value_;

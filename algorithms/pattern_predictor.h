@@ -36,55 +36,61 @@
 
 namespace stmlib {
   
-template<size_t history_size = 32, uint8_t max_candidate_period = 8>
+template<size_t history_size = 16, uint8_t max_candidate_period = 8>
 class PatternPredictor {
  public: 
   PatternPredictor() { }
 
   void Init() {
-    last_prediction_ = 0;
     history_pointer_ = 0;
     std::fill(&history_[0], &history_[history_size], 0);
+    std::fill(
+        &prediction_error_[0],
+        &prediction_error_[max_candidate_period + 1],
+        0);
+    std::fill(
+        &predicted_period_[0],
+        &predicted_period_[max_candidate_period + 1],
+        0);
   }
   
-  uint32_t Predict(uint32_t value) {
-    // Record the incoming value.
+  uint32_t Predict(int32_t value) {
     history_[history_pointer_] = value;
+    int best_period = 0;
     
-    // Try various candidate periods
-    uint8_t best_score = 0;
-    uint8_t period = 0;
-    for (uint8_t t = 1; t < max_candidate_period; ++t) {
-      uint8_t score = 0;
-      for (uint8_t k = 0; k < history_size; ++k) {
-        uint32_t i = history_pointer_ + 2 * history_size - k;
-        uint32_t j = i - t;
-        i = i % history_size;
-        j = j % history_size;
-        uint32_t error = abs(static_cast<int32_t>(history_[i] - history_[j]));
-        if (error < (history_[i] >> 4)) {
-          ++score;
-        }
+    for (int i = 0; i <= max_candidate_period; ++i) {
+      int32_t error = abs(predicted_period_[i] - value);
+      int32_t delta = error - prediction_error_[i];
+      
+      // Compute LP-ed prediction error.
+      if (delta > 0) {
+        prediction_error_[i] += delta >> 1;
+      } else {
+        prediction_error_[i] += delta >> 3;
       }
-      if (score >= best_score) {
-        best_score = score;
-        period = t;
+      
+      if (i == 0) {
+        predicted_period_[i] = (value + predicted_period_[i]) >> 1;
+      } else {
+        uint32_t t = history_pointer_ + 1 + history_size - i;
+        predicted_period_[i] = history_[t % history_size];
+      }
+      
+      if (prediction_error_[i] < prediction_error_[best_period]) {
+        best_period = i;
       }
     }
+
     history_pointer_ = (history_pointer_ + 1) % history_size;
-    uint32_t new_prediction = \
-        history_[(history_pointer_ - period + history_size) % history_size];
-    
-    uint32_t error = abs(static_cast<int32_t>(value - last_prediction_));
-    bool prediction_was_good = error < (value >> 4);
-    last_prediction_ = new_prediction;
-    return prediction_was_good ? new_prediction : value;
+    return static_cast<uint32_t>(predicted_period_[best_period]);
   }
+
 
  private:
   uint32_t history_[history_size];
+  int32_t prediction_error_[max_candidate_period + 1];
+  int32_t predicted_period_[max_candidate_period + 1];
   uint32_t history_pointer_;
-  uint32_t last_prediction_;
 
   DISALLOW_COPY_AND_ASSIGN(PatternPredictor);
 };

@@ -156,6 +156,14 @@ class OnePole {
     }
   }
   
+  template<FilterMode mode>
+  inline void Process(float* in_out, size_t size) {
+    while (size--) {
+      *in_out = Process<mode>(*in_out);
+      ++in_out;
+    }
+  }
+  
  private:
   float g_;
   float gi_;

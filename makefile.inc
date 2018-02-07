@@ -109,7 +109,7 @@ MODEL_DEFINE = STM32F37X -DARM_MATH_CM4 -D__FPU_PRESENT
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f37x.o
 LINKER_SCRIPT = stmlib/linker_scripts/stm32f373x_flash$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F37x_StdPeriph_Driver
-ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork -funroll-loops
+ARCHFLAGS = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb-interwork -funroll-loops --specs=nano.specs
 ARCH_DEFINE = GCC_ARMCM4
 OPENOCD_TARGET = f3x
 

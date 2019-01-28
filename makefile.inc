@@ -123,14 +123,34 @@ ARCHFLAGS = -mcpu=cortex-m0 -mthumb -mthumb-interwork -funroll-loops
 ARCH_DEFINE = GCC_ARMCM0
 OPENOCD_TARGET = f0x
 
+else ifeq ($(FAMILY),f7xx)
+
+MODEL_DEFINE = STM32F7XX -DSTM32F765xx -DARM_MATH_CM7 -D__FPU_PRESENT
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f765xx.o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32f7xx_flash$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32F7xx_HAL_Driver
+ARCHFLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 -mthumb-interwork -funroll-loops
+ARCH_DEFINE = GCC_ARMCM7
+OPENOCD_TARGET = f7x
+
+else ifeq ($(FAMILY),h7xx)
+
+MODEL_DEFINE = STM32H7XX -DSTM32H743xx -DARM_MATH_CM7 -D__FPU_PRESENT
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32h743xx.o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32h7xx_flash$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32H7xx_HAL_Driver
+ARCHFLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 -mthumb-interwork -funroll-loops
+ARCH_DEFINE = GCC_ARMCM7
+OPENOCD_TARGET = h7x
+
 else
 
 ifeq ($(DENSITY),hd)
-MODEL_DEFINE = STM32F10X_HD
+MODEL_DEFINE = STM32F10X_HD -DSTM32F10X
 else ifeq ($(DENSITY),md)
-MODEL_DEFINE = STM32F10X_MD
+MODEL_DEFINE = STM32F10X_MD -DSTM32F10X
 else
-MODEL_DEFINE = STM32F10X_CL
+MODEL_DEFINE = STM32F10X_CL -DSTM32F10X
 endif
 
 STARTUP_OBJ   = $(BUILD_DIR)startup_stm32f10x_$(DENSITY).o
@@ -174,6 +194,7 @@ INCFLAGS = \
 			$(PROJECT_CONFIGURATION) \
 			-DF_CPU=$(F_CPU) \
 			-DF_CRYSTAL=$(F_CRYSTAL) \
+			-DHSE_VALUE=$(F_CRYSTAL) \
 			-DUSE_STDPERIPH_DRIVER \
 			-D$(SYSCLOCK)=$(F_CPU)
 
@@ -186,6 +207,7 @@ CCFLAGS = \
 			-ffunction-sections \
 			-fshort-enums \
 			-fno-move-loop-invariants \
+			-fno-unwind-tables \
 			$(INCFLAGS) \
 			$(ARCHFLAGS)
 
@@ -354,6 +376,7 @@ $(COMBO_BIN): $(TARGET_HEX) $(BOOTLOADER_HEX)
 # ------------------------------------------------------------------------------
 
 BASE_JTAG_CMD = openocd \
+			-s /opt/local/share/openocd/scripts \
 			-f $(OPENOCD_INTERFACE_SCRIPT) \
 			-f $(OPENOCD_TARGET_SCRIPT) \
 			-c "init" -c "halt" -c "sleep 200"
@@ -415,9 +438,7 @@ debug_server: $(TARGET_BIN)
 	openocd \
 		-f $(OPENOCD_INTERFACE_SCRIPT) \
 		-f $(OPENOCD_TARGET_SCRIPT) \
-		-c "init" \
-		-c "reset" \
-		-c "halt"
+		-c "init;reset;halt" \
 
 debug_client:
 	$(DB) --eval-command="target remote localhost:3333" $(TARGET_ELF)
@@ -431,27 +452,27 @@ erase_jtag:
 upload_jtag: $(TARGET_BIN)
 	$(BASE_JTAG_CMD) \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
-				-c "flash write_bank 0 $(TARGET_BIN) 0x0" \
-				-c "verify_image $(TARGET_BIN)" \
+				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
+				-c "verify_image $(TARGET_BIN) 0x08000000" \
 				$(POSTLUDE)
 
 upload_combo_jtag: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
-				-c "flash write_bank 0 $(COMBO_BIN) 0x0" \
-				-c "verify_image $(COMBO_BIN)" \
+				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
+				-c "verify_image $(COMBO_BIN) 0x08000000" \
 				$(POSTLUDE)
 
 upload_jtag_no_erase: $(TARGET_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
-				-c "verify_image $(TARGET_BIN)" \
+				-c "verify_image $(TARGET_BIN) 0x08000000" \
 				$(POSTLUDE)
 
 upload_combo_jtag_no_erase: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
-				-c "verify_image $(COMBO_BIN)" \
+				-c "verify_image $(COMBO_BIN) 0x08000000" \
 				$(POSTLUDE)
 
 upload_jtag_erase_first: $(TARGET_BIN)
@@ -459,7 +480,7 @@ upload_jtag_erase_first: $(TARGET_BIN)
 				-c "flash erase_address 0x08000000 32768" \
 				-c "reset halt" \
 				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
-				-c "verify_image $(TARGET_BIN)" \
+				-c "verify_image $(TARGET_BIN) 0x08000000" \
 				$(POSTLUDE)
 
 upload_combo_jtag_erase_first: $(COMBO_BIN)
@@ -467,7 +488,23 @@ upload_combo_jtag_erase_first: $(COMBO_BIN)
 				-c "flash erase_address 0x08000000 32768" \
 				-c "reset halt" \
 				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
-				-c "verify_image $(COMBO_BIN)" \
+				-c "verify_image $(COMBO_BIN) 0x08000000" \
+				$(POSTLUDE)
+
+upload_jtag_erase_first_sector: $(TARGET_BIN)
+	$(BASE_JTAG_CMD) \
+				-c "flash erase_address 0x08000000 0x20000" \
+				-c "reset halt" \
+				-c "flash write_image erase $(TARGET_BIN) 0x08000000" \
+				-c "verify_image $(TARGET_BIN) 0x08000000" \
+				$(POSTLUDE)
+
+upload_combo_jtag_erase_first: $(COMBO_BIN)
+	$(BASE_JTAG_CMD) \
+				-c "flash erase_address 0x08000000 0x20000" \
+				-c "reset halt" \
+				-c "flash write_image erase $(COMBO_BIN) 0x08000000" \
+				-c "verify_image $(COMBO_BIN) 0x08000000" \
 				$(POSTLUDE)
 
 # Phony target for killing the system FTDI driver on OS X.

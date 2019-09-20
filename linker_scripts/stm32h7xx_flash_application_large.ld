@@ -1,7 +1,7 @@
 /*
 	Copyright 2017-2018 Emilie Gillet, Fred's Lab
 
-	Author: Frédéric Meslin (fred@fredslab.net)
+	Author: Frederic Meslin (fred@fredslab.net)
 	Author: Oliver Rockstedt (info@sourcebox.de)
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,14 +33,13 @@ _Min_Stack_Size = 0x400;
 
 MEMORY
 {
-	FLASH (rx)			: ORIGIN = 0x08000000, LENGTH = 2M - 2k			/** Flash Sector 1 - application */
-	SETTINGS (rx)		: ORIGIN = 0x081FF800, LENGTH = 2k				/** Flash Sector 2 - settings */
+	FLASH (rx)			: ORIGIN = 0x08000000, LENGTH = 2M			/** Flash Sector 1 - application */
 	ITCM (xrw)			: ORIGIN = 0x00000000, LENGTH = 64K				/** RAM ITCM - Instruction TCM */
 	DTCM (xrw)			: ORIGIN = 0x20000000, LENGTH = 128K			/** RAM DTCM - Data TCM */
 	RAM_D1 (xrw)    	: ORIGIN = 0x24000000, LENGTH = 512K			/** SRAM D1 - AXI SRAM */
 	RAM_D2 (xrw)    	: ORIGIN = 0x30000000, LENGTH = 256K			/** SRAM D2 - SRAM1 & SRAM2 */
 	RAM_D2_DMA (xrw)	: ORIGIN = 0x30040000, LENGTH = 32K				/** SRAM D2 - SRAM3 (uncached) */
-	RAM_D3 (xrw)    	: ORIGIN = 0x38000000, LENGTH = 64K				/** SRAM D3 - SRAM4 */
+	RAM_D3 (xrw)    	: ORIGIN = 0x38000000, LENGTH = 64K				/** SRAM D3 - Static ram Domain 3 */
 }
 
 SECTIONS

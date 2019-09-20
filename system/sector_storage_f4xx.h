@@ -40,8 +40,8 @@
 // ParsimoniousLoad and ParsimoniousSave, and practically extends the life of
 // the flash memory by a 40x factor in Braids.
 
-#ifndef STMLIB_SYSTEM_SECTOR_STORAGE_H_
-#define STMLIB_SYSTEM_SECTOR_STORAGE_H_
+#ifndef STMLIB_SYSTEM_SECTOR_STORAGE_F4XX_H_
+#define STMLIB_SYSTEM_SECTOR_STORAGE_F4XX_H_
 
 #include <stm32f4xx_conf.h>
 
@@ -350,4 +350,4 @@ class Storage {
 
 };  // namespace stmlib
 
-#endif  // STMLIB_SYSTEM_PAGE_STORAGE_H_
+#endif  // STMLIB_SYSTEM_SECTOR_STORAGE_F4XX_H_

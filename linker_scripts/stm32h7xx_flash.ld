@@ -82,7 +82,7 @@ SECTIONS
 		*(.data.*)
 		. = ALIGN(4);
 		_edata = .;				/* Data end marker */
-	} >RAM_D1 AT> FLASH
+	} >DTCM AT> FLASH
 
 	.bss :
 	{
@@ -93,7 +93,7 @@ SECTIONS
 		*(COMMON)
 		. = ALIGN(4);
 		_ebss = .;				/* BSS end marker */
-	} >RAM_D1
+	} >DTCM
 
 	.dma (NOLOAD):
 	{

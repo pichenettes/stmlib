@@ -106,7 +106,18 @@ SECTIONS
 		_eramd2dma = .;			/* RAMD2DMA end marker */
 	} >RAM_D2_DMA
 	
-	.ramd2 :
+	.ramd1 (NOLOAD):
+	{
+		. = ALIGN(4);
+		_ramd1 = .;				/* RAMD1 start marker */
+		*(.ramd1)
+		*(.ramd1*)
+		*(COMMON)
+		. = ALIGN(4);
+		_eramd1 = .;			/* RAMD1 end marker */
+	} >RAM_D1
+
+	.ramd2 (NOLOAD):
 	{
 		. = ALIGN(4);
 		_ramd2 = .;				/* RAMD2 start marker */
@@ -117,7 +128,7 @@ SECTIONS
 		_eramd2 = .;			/* RAMD2 end marker */
 	} >RAM_D2
 
-	.ramd3 :
+	.ramd3 (NOLOAD):
 	{
 		. = ALIGN(4);
 		_ramd3 = .;				/* RAMD2 start marker */

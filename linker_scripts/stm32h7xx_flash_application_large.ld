@@ -33,7 +33,7 @@ _Min_Stack_Size = 0x400;
 
 MEMORY
 {
-	FLASH (rx)			: ORIGIN = 0x08000000, LENGTH = 2M			/** Flash Sector 1 - application */
+	FLASH (rx)			: ORIGIN = 0x08020000, LENGTH = 2M-128k			/** Flash Sector 2 - application */
 	ITCM (xrw)			: ORIGIN = 0x00000000, LENGTH = 64K				/** RAM ITCM - Instruction TCM */
 	DTCM (xrw)			: ORIGIN = 0x20000000, LENGTH = 128K			/** RAM DTCM - Data TCM */
 	RAM_D1 (xrw)    	: ORIGIN = 0x24000000, LENGTH = 512K			/** SRAM D1 - AXI SRAM */
@@ -82,7 +82,7 @@ SECTIONS
 		*(.data.*)
 		. = ALIGN(4);
 		_edata = .;				/* Data end marker */
-	} >RAM_D1 AT> FLASH
+	} >DTCM AT> FLASH
 
 	.bss :
 	{
@@ -93,7 +93,7 @@ SECTIONS
 		*(COMMON)
 		. = ALIGN(4);
 		_ebss = .;				/* BSS end marker */
-	} >RAM_D1
+	} >DTCM
 
 	.dma (NOLOAD):
 	{
@@ -106,7 +106,18 @@ SECTIONS
 		_eramd2dma = .;			/* RAMD2DMA end marker */
 	} >RAM_D2_DMA
 	
-	.ramd2 :
+	.ramd1 (NOLOAD):
+	{
+		. = ALIGN(4);
+		_ramd1 = .;				/* RAMD1 start marker */
+		*(.ramd1)
+		*(.ramd1*)
+		*(COMMON)
+		. = ALIGN(4);
+		_eramd1 = .;			/* RAMD1 end marker */
+	} >RAM_D1
+  
+	.ramd2 (NOLOAD):
 	{
 		. = ALIGN(4);
 		_ramd2 = .;				/* RAMD2 start marker */
@@ -117,7 +128,7 @@ SECTIONS
 		_eramd2 = .;			/* RAMD2 end marker */
 	} >RAM_D2
 
-	.ramd3 :
+	.ramd3 (NOLOAD):
 	{
 		. = ALIGN(4);
 		_ramd3 = .;				/* RAMD2 start marker */

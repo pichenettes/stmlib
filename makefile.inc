@@ -436,6 +436,7 @@ image_jtag_1M:
 
 debug_server: $(TARGET_BIN)
 	openocd \
+		-s /opt/local/share/openocd/scripts \
 		-f $(OPENOCD_INTERFACE_SCRIPT) \
 		-f $(OPENOCD_TARGET_SCRIPT) \
 		-c "init;reset;halt" \
@@ -499,7 +500,7 @@ upload_jtag_erase_first_sector: $(TARGET_BIN)
 				-c "verify_image $(TARGET_BIN) 0x08000000" \
 				$(POSTLUDE)
 
-upload_combo_jtag_erase_first: $(COMBO_BIN)
+upload_combo_jtag_erase_first_sector: $(COMBO_BIN)
 	$(BASE_JTAG_CMD) \
 				-c "flash erase_address 0x08000000 0x20000" \
 				-c "reset halt" \

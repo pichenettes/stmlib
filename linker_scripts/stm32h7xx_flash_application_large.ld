@@ -149,15 +149,16 @@ SECTIONS
 		_edtcm = .;				/* DTCM end marker */
 	} >DTCM
 
-	.itcm (NOLOAD):
+	.itcm :
 	{
 		. = ALIGN(4);
 		_sitcm = .;				/* ITCM start marker */
+		*(.ramtext*)
 		*(.itcm)
 		*(.itcm*)
 		. = ALIGN(4);
 		_eitcm = .;				/* ITCM end marker */
-	} >ITCM
+	} >ITCM AT> FLASH
 	
 	PROVIDE ( end = _ebss );
 	PROVIDE ( _end = _ebss );

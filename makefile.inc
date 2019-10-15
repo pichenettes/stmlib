@@ -141,7 +141,7 @@ LINKER_SCRIPT = stmlib/linker_scripts/stm32h7xx_flash$(LD_SUFFIX).ld
 FW_STDDRIVER_DIR = $(STM32_PATH)/STM32H7xx_HAL_Driver
 ARCHFLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 -mthumb-interwork -funroll-loops
 ARCH_DEFINE = GCC_ARMCM7
-OPENOCD_TARGET = h7x
+OPENOCD_TARGET = h7x_dual_bank
 
 else
 

@@ -375,8 +375,8 @@ $(COMBO_BIN): $(TARGET_HEX) $(BOOTLOADER_HEX)
 # Firmware flashing
 # ------------------------------------------------------------------------------
 
-BASE_JTAG_CMD = openocd \
-			-s /opt/local/share/openocd/scripts \
+BASE_JTAG_CMD = $(OPENOCD_BIN_PATH)openocd \
+			-s $(OPENOCD_SCRIPT_PATH) \
 			-f $(OPENOCD_INTERFACE_SCRIPT) \
 			-f $(OPENOCD_TARGET_SCRIPT) \
 			-c "init" -c "halt" -c "sleep 200"
@@ -435,8 +435,8 @@ image_jtag_1M:
 		$(POSTLUDE)
 
 debug_server: $(TARGET_BIN)
-	openocd \
-		-s /opt/local/share/openocd/scripts \
+	$(OPENOCD_BIN_PATH)openocd \
+		-s $(OPENOCD_SCRIPT_PATH) \
 		-f $(OPENOCD_INTERFACE_SCRIPT) \
 		-f $(OPENOCD_TARGET_SCRIPT) \
 		-c "init;reset;halt" \

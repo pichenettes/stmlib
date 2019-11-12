@@ -38,6 +38,8 @@ else
 OPENOCD_INTERFACE_SCRIPT ?= interface/$(PGM_INTERFACE).cfg
 endif
 
+OPENOCD_SCRIPT_PATH ?= /opt/local/share/openocd/scripts/
+
 PGM_SERIAL_PORT ?= /dev/ftdi-usbserial
 PGM_SERIAL_BAUD_RATE ?= 115200
 PGM_SERIAL_VERIFY ?= -v

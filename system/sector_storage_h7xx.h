@@ -130,6 +130,7 @@ class ChunkStorage {
       HAL_FLASH_Unlock();
       WriteChunk(next_state_chunk_index_, state_data_);
       next_state_chunk_index_++;
+      HAL_FLASH_Lock();
     }
   }
   
@@ -153,6 +154,7 @@ class ChunkStorage {
     WriteChunk(0, persistent_data_);
     WriteChunk(1, state_data_);
     next_state_chunk_index_ = 2;
+    HAL_FLASH_Lock();
   }
 
   template<typename T>

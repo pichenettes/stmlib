@@ -448,7 +448,6 @@ debug_client:
 
 erase_jtag:
 	$(BASE_JTAG_CMD) \
-        -c "stm32f4x unlock 0" \
 				-f $(OPENOCD_SCRIPTS_PATH)erase_$(FAMILY).cfg \
 				$(POSTLUDE)
 

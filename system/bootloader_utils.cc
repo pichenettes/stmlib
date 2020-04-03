@@ -48,6 +48,9 @@
   #include <stm32h7xx_hal_conf.h>
 #endif  // STM32H7XX
 
+#ifdef STM32G4XX
+  #include <stm32g4xx_hal_conf.h>
+#endif  // STM32G4XX
 
 namespace stmlib {
 

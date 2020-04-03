@@ -145,6 +145,16 @@ ARCHFLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 -mthumb-inte
 ARCH_DEFINE = GCC_ARMCM7
 OPENOCD_TARGET = h7x_dual_bank
 
+else ifeq ($(FAMILY),g4xx)
+
+MODEL_DEFINE = STM32G4XX -DSTM32G473xx -DARM_MATH_CM7 -D__FPU_PRESENT
+STARTUP_OBJ   = $(BUILD_DIR)startup_stm32g473xx.o
+LINKER_SCRIPT = stmlib/linker_scripts/stm32g4xx_flash$(LD_SUFFIX).ld
+FW_STDDRIVER_DIR = $(STM32_PATH)/STM32G4xx_HAL_Driver
+ARCHFLAGS = -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -mfpu=fpv5-d16 -mthumb-interwork -funroll-loops
+ARCH_DEFINE = GCC_ARMCM7
+OPENOCD_TARGET = g4x
+
 else
 
 ifeq ($(DENSITY),hd)

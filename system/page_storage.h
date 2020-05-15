@@ -168,10 +168,7 @@ class ChunkStorage {
 
   template<typename T>
   void WriteChunk(size_t index, const T* data) {
-    ChunkHeader h;
-    h.tag = T::tag;
-    h.size = sizeof(T);
-    h.checksum = Checksum(data, sizeof(T));
+    ChunkHeader h{T::tag, sizeof(T), Checksum(data, sizeof(T))};
 
     FlashWrite(chunk_address(index), &h);
     FlashWrite(chunk_address(index) + sizeof(ChunkHeader), data);

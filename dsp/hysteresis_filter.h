@@ -39,8 +39,14 @@ class HysteresisFilter {
   ~HysteresisFilter() { }
 
   void Init(float threshold) {
+    Init(threshold, 0);
+  }
+  
+  void Init(float threshold, int tracking_time) {
     value_ = 0.0f;
     threshold_ = threshold;
+    tracking_time_ = tracking_time;
+    tracking_counter_ = 0;
   }
   
   inline float Process(float value) {
@@ -48,16 +54,23 @@ class HysteresisFilter {
   }
 
   inline float Process(float value, float threshold) {
-    if (threshold == 0.0f) {
+    if (threshold == 0.0f || tracking_counter_) {
       value_ = value;
     } else {
       float error = value - value_;
       if (error > threshold) {
         value_ = value - threshold;
+        tracking_counter_ = tracking_time_;
       } else if (error < -threshold) {
         value_ = value + threshold;
+        tracking_counter_ = tracking_time_;
       }
     }
+    
+    if (tracking_counter_) {
+      --tracking_counter_;
+    }
+    
     return value_;
   }
 
@@ -66,6 +79,9 @@ class HysteresisFilter {
  private:
   float value_;
   float threshold_;
+  
+  int tracking_time_;
+  int tracking_counter_;
 
   DISALLOW_COPY_AND_ASSIGN(HysteresisFilter);
 };
@@ -73,3 +89,4 @@ class HysteresisFilter {
 }  // namespace stmlib
 
 #endif  // STMLIB_DSP_HYSTERESIS_FILTER_H_
+

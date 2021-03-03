@@ -74,6 +74,10 @@ inline float InterpolateWrap(const float* table, float index, float size) {
   return a + (b - a) * index_fractional;
 }
 
+inline float SmoothStep(float value) const {
+  return value * value * (3.0f - 2.0f * value);
+}
+
 #define ONE_POLE(out, in, coefficient) out += (coefficient) * ((in) - out);
 #define SLOPE(out, in, positive, negative) { \
   float error = (in) - out; \

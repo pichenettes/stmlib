@@ -149,6 +149,7 @@ SECTIONS
 		_edtcm = .;				/* DTCM end marker */
 	} >DTCM
 
+	_siitcm = LOADADDR(.itcm);
 	.itcm :
 	{
 		. = ALIGN(4);

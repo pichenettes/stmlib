@@ -116,6 +116,10 @@ class HysteresisQuantizer2 {
   const T& Lookup(const T* array, float value) {
     return array[Process(value)];
   }
+  
+  inline int num_steps() const {
+    return num_steps_;
+  }
 
  private:
   int num_steps_;

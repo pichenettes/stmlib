@@ -37,7 +37,9 @@ namespace stmlib {
 template<typename T, size_t size>
 class RingBuffer {
  public:
-  RingBuffer() { }
+  RingBuffer() {
+    static_assert((size > 1) & !(size & (size - 1)), "RingBuffer size needs to be a power of 2");
+  }
   
   inline void Init() {
     read_ptr_ = write_ptr_ = 0;

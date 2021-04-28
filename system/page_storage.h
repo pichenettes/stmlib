@@ -261,7 +261,7 @@ class Storage {
   
   template<typename T>
   static void ParsimoniousSave(const T& data, uint16_t* version_token) {
-    return ParsimoniousSave((void*)(&data), sizeof(T), version_token);
+    ParsimoniousSave((void*)(&data), sizeof(T), version_token);
   }
   
   static void ParsimoniousSave(

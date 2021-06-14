@@ -66,6 +66,8 @@ class AdaptiveFilter {
     mode_ = MODE_ONE_POLE;
     value_ = 0.0f;
     history_[0] = 0.0f;
+    
+    zero_streak_ = 0;
 
     i_ = 0;
     n_ = observation_period;
@@ -75,12 +77,19 @@ class AdaptiveFilter {
   }
   
   inline float Process(float value) {
+    if (fabsf(value) < 0.5f * threshold_) {
+      ++zero_streak_;
+    } else {
+      zero_streak_ = 0;
+    }
+    
     if (fabsf(value - value_) > threshold_) {
       bool was_stable = stable_segment_counter_ > stable_segment_duration_;
       mode_ = was_stable ? MODE_MEDIAN : MODE_ONE_POLE;
       i_ = 0;
       stable_segment_counter_ = 0;
     }
+    ++stable_segment_counter_;
     
     if (mode_ == MODE_MEDIAN) {
       history_[i_] = value;
@@ -99,16 +108,18 @@ class AdaptiveFilter {
         mode_ = MODE_HOLD;
       }
     } else if (mode_ == MODE_ONE_POLE) {
-      value_ += (value - value_) * lp_coefficient_;
+      const float adjust = zero_streak_ > stable_segment_duration_ * 10
+          ? 0.1f : 1.0f;
+      value_ += (value - value_) * lp_coefficient_ * adjust;
     }
-    
-    ++stable_segment_counter_;
     
     return value_;
   }
 
  private:
   int stable_segment_duration_;
+  int zero_streak_;
+  
   float lp_coefficient_;
   float threshold_;
   

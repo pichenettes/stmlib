@@ -63,7 +63,7 @@ class AdaptiveFilter {
     lp_coefficient_ = lp_coefficient;
     threshold_ = threshold;
 
-    mode_ = MODE_TRACK;
+    mode_ = MODE_ONE_POLE;
     value_ = 0.0f;
     history_[0] = 0.0f;
 

@@ -47,6 +47,11 @@ class BufferAllocator {
     size_ = size;
     Free();
   }
+
+  template<typename T>
+  inline T* Allocate() {
+    return Allocate<T>(1);
+  }
   
   template<typename T>
   inline T* Allocate(size_t size) {

@@ -122,6 +122,13 @@ class ChunkStorage {
     RewriteSector();
     return false;
   }
+  
+  void Recover(PersistentData* persistent_data, StateData* state_data) {
+    persistent_data_ = persistent_data;
+    state_data_ = state_data;
+    ReadChunk(0, persistent_data_);
+    RewriteSector();
+  }
 
   void SaveState() {
     if (chunk_address(next_state_chunk_index_ + 1) > FLASH_STORAGE_LAST) {

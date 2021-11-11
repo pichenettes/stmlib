@@ -120,6 +120,10 @@ class HysteresisQuantizer2 {
   inline int num_steps() const {
     return num_steps_;
   }
+  
+  inline int quantized_value() const {
+    return quantized_value_;
+  }
 
  private:
   int num_steps_;

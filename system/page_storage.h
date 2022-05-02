@@ -94,6 +94,7 @@ class ChunkStorage {
     uint32_t tag;
     uint16_t size;
     uint16_t checksum;
+    uint16_t pad[2];
   };
 
   enum {
